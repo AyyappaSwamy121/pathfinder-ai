@@ -1,6 +1,6 @@
 import React from 'react';
 import { NextBestAction } from '../types';
-import { Sparkles, Play, Clock, HelpCircle } from 'lucide-react';
+import { Play, Clock, HelpCircle, ArrowRight } from 'lucide-react';
 
 interface NextBestActionCardProps {
   action: NextBestAction;
@@ -14,52 +14,57 @@ export const NextBestActionCard: React.FC<NextBestActionCardProps> = ({
   onWhyThis,
 }) => {
   return (
-    <div className="bg-gradient-to-br from-primary-soft/80 via-white to-white border-2 border-primary/20 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mr-10 -mt-10" />
+    <div className="bg-surface border border-slate-200 rounded-lg p-6 shadow-subtle flex flex-col justify-between h-full">
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-2">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-primary bg-primary-soft px-2.5 py-1 rounded">
+              NEXT BEST ACTION
+            </span>
+            <span className="text-xs font-medium text-slate-500 flex items-center">
+              <Clock className="w-3.5 h-3.5 mr-1 text-slate-400" />
+              {action.estimated_minutes} mins
+            </span>
+          </div>
 
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center space-x-2">
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary text-white uppercase tracking-wider">
-            <Sparkles className="w-3 h-3 mr-1" />
-            YOUR NEXT BEST ACTION
-          </span>
-          <span className="text-xs text-text-muted flex items-center">
-            <Clock className="w-3.5 h-3.5 mr-1" />
-            {action.estimated_minutes} mins
-          </span>
+          <button
+            onClick={onWhyThis}
+            className="text-xs font-semibold text-primary hover:text-primary-dark flex items-center space-x-1 focus:outline-none"
+          >
+            <HelpCircle className="w-3.5 h-3.5" />
+            <span>Why this?</span>
+          </button>
         </div>
 
-        <button
-          onClick={onWhyThis}
-          className="text-xs text-primary font-semibold flex items-center hover:underline focus:outline-none"
-        >
-          <HelpCircle className="w-3.5 h-3.5 mr-1" />
-          Why this?
-        </button>
+        <h3 className="text-lg font-bold text-slate-900 mb-2 leading-snug">
+          {action.title}
+        </h3>
+
+        <div className="bg-slate-50 border border-slate-100 rounded-md p-3 mb-5">
+          <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+            Relevance Rationale
+          </div>
+          <p className="text-xs text-slate-700 leading-relaxed">
+            {action.why_now}
+          </p>
+        </div>
       </div>
 
-      <h3 className="text-xl font-bold text-text-main mb-2 tracking-tight">
-        {action.title}
-      </h3>
-
-      <p className="text-sm text-text-muted mb-5 leading-relaxed">
-        {action.why_now}
-      </p>
-
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-3 pt-2">
         <button
           onClick={onStartAction}
-          className="bg-primary hover:bg-primary-dark text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center space-x-2 shadow-sm transition-all hover:scale-[1.02]"
+          className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md font-semibold text-xs flex items-center space-x-2 shadow-subtle transition-colors"
         >
-          <Play className="w-4 h-4 fill-white" />
+          <Play className="w-3.5 h-3.5 fill-white" />
           <span>{action.cta_label}</span>
         </button>
 
         <button
           onClick={onWhyThis}
-          className="bg-white hover:bg-gray-50 text-text-main border border-border px-4 py-2.5 rounded-xl font-medium text-sm transition-colors"
+          className="bg-surface hover:bg-slate-50 text-slate-700 border border-slate-200 px-3.5 py-2 rounded-md font-medium text-xs transition-colors flex items-center space-x-1"
         >
-          View Prerequisite Reason
+          <span>View Reasoning</span>
+          <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
         </button>
       </div>
     </div>

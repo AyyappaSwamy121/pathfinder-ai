@@ -20,17 +20,17 @@ export const SkillGapBadge: React.FC<SkillGapBadgeProps> = ({ status, name, prof
       label: 'Developing',
     },
     MISSING: {
-      bg: 'bg-gray-50 text-gray-700 border-gray-200',
+      bg: 'bg-slate-100 text-slate-700 border-slate-200',
       icon: AlertCircle,
       label: 'Missing Gap',
     },
     LOCKED: {
-      bg: 'bg-rose-50 text-rose-700 border-rose-200',
+      bg: 'bg-rose-50 text-rose-800 border-rose-200',
       icon: Lock,
       label: 'Prerequisite Locked',
     },
     RECOMMENDED: {
-      bg: 'bg-amber-50 text-amber-800 border-amber-300 font-bold animate-pulse',
+      bg: 'bg-amber-50 text-amber-900 border-amber-300 font-semibold',
       icon: Sparkles,
       label: 'Next Recommended',
     },
@@ -41,7 +41,7 @@ export const SkillGapBadge: React.FC<SkillGapBadgeProps> = ({ status, name, prof
 
   return (
     <div
-      className={`inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs border font-medium transition-all ${config.bg}`}
+      className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs border font-medium transition-all ${config.bg}`}
     >
       <Icon className="w-3.5 h-3.5 shrink-0" />
       <span className="truncate">{name}</span>

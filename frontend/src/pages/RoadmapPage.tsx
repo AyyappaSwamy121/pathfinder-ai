@@ -1,217 +1,241 @@
 import React, { useState } from 'react';
 import { useLearner } from '../context/LearnerContext';
+import { PathStep, Resource, Project } from '../types';
 import { WhyThisModal } from '../components/WhyThisModal';
 import { AssessmentModal } from '../components/AssessmentModal';
 import { FeedbackModal } from '../components/FeedbackModal';
-import { api } from '../services/api';
-import { PathStep, AssessmentDetail } from '../types';
-import { CheckCircle2, Clock, HelpCircle, Award, ExternalLink, MessageSquare, Play, Sparkles, FolderGit2, BookOpen } from 'lucide-react';
+import {
+  CheckCircle2, Clock, MapPin, Play, Award, FileText, ExternalLink, HelpCircle, ChevronDown, ChevronRight, AlertCircle, RefreshCw, BookOpen
+} from 'lucide-react';
 
 export const RoadmapPage: React.FC = () => {
-  const { activePath, refreshState } = useLearner();
+  const { activePath, dashboard, loading, refreshState } = useLearner();
 
-  const [whyThisStep, setWhyThisStep] = useState<PathStep | null>(null);
-  const [activeAssessment, setActiveAssessment] = useState<AssessmentDetail | null>(null);
-  const [feedbackStep, setFeedbackStep] = useState<PathStep | null>(null);
+  const [selectedStep, setSelectedStep] = useState<PathStep | null>(null);
+  const [whyThisOpen, setWhyThisOpen] = useState(false);
+  const [whyThisSkill, setWhyThisSkill] = useState<{ name: string; reason?: string }>({ name: '' });
+  const [assessmentOpen, setAssessmentOpen] = useState(false);
+  const [activeAssessmentId, setActiveAssessmentId] = useState<string>('a_model_eval');
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
-  const handleOpenAssessment = async (assessmentId: string) => {
-    try {
-      const data = await api.getAssessment(assessmentId);
-      setActiveAssessment(data);
-    } catch (err) {
-      console.error('Failed to load assessment:', err);
-    }
-  };
-
-  // Group steps by Phase Number
-  const phasesMap: Record<number, { title: string; steps: PathStep[] }> = {};
-  if (activePath?.steps) {
-    activePath.steps.forEach((step) => {
-      if (!phasesMap[step.phase_number]) {
-        phasesMap[step.phase_number] = { title: step.phase_title, steps: [] };
-      }
-      phasesMap[step.phase_number].steps.push(step);
-    });
+  if (loading || !activePath) {
+    return (
+      <div className="space-y-4 animate-pulse">
+        <div className="h-20 bg-slate-200 rounded-lg" />
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="h-32 bg-slate-200 rounded-lg" />
+        ))}
+      </div>
+    );
   }
 
+  // Group steps by Phase Number
+  const phaseMap: Record<number, { title: string; steps: PathStep[] }> = {};
+  activePath.steps.forEach((step) => {
+    if (!phaseMap[step.phase_number]) {
+      phaseMap[step.phase_number] = {
+        title: step.phase_title,
+        steps: [],
+      };
+    }
+    phaseMap[step.phase_number].steps.push(step);
+  });
+
+  const phases = Object.keys(phaseMap).map(Number).sort((a, b) => a - b);
+
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Title */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-6 gap-4">
+    <div className="space-y-6">
+      {/* Header Overview */}
+      <div className="bg-surface border border-slate-200 rounded-lg p-6 shadow-subtle flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-primary-soft text-primary font-semibold text-xs mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>TOPOLOGICAL PREREQUISITE ROADMAP</span>
+          <div className="text-[10px] font-extrabold text-primary uppercase tracking-widest mb-1">
+            PERSONALIZED CAREER PROGRESSION
           </div>
-          <h1 className="text-3xl font-extrabold text-text-main tracking-tight">
-            Personalized {activePath?.career_title || 'AI Engineer'} Learning Path
-          </h1>
-          <p className="text-xs text-text-muted mt-1">
-            Topologically ordered learning path generated specifically for your profile.
+          <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+            {activePath.career_title} Learning Roadmap
+          </h2>
+          <p className="text-xs text-slate-600 mt-1">
+            Topologically ordered sequence respecting Directed Acyclic Graph (DAG) prerequisites
           </p>
         </div>
 
-        <button
-          onClick={() => refreshState()}
-          className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-xl font-semibold text-xs shadow-xs transition-colors"
-        >
-          Re-rank Topological Path
-        </button>
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={() => refreshState()}
+            className="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 font-semibold px-3 py-1.5 rounded-md text-xs transition-colors flex items-center space-x-1"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Recalculate Roadmap</span>
+          </button>
+        </div>
       </div>
 
-      {/* Vertical Phase Timeline */}
-      <div className="space-y-10 relative">
-        <div className="absolute left-6 top-8 bottom-8 w-0.5 bg-border -z-0 hidden md:block" />
-
-        {Object.entries(phasesMap).map(([phaseNum, phaseData]) => {
-          const completedInPhase = phaseData.steps.filter((s) => s.status === 'COMPLETED').length;
-          const totalInPhase = phaseData.steps.length;
+      {/* Vertical Phase Milestone Timeline */}
+      <div className="space-y-6">
+        {phases.map((phaseNum) => {
+          const phase = phaseMap[phaseNum];
+          const completedInPhase = phase.steps.filter((s) => s.status === 'COMPLETED').length;
+          const totalInPhase = phase.steps.length;
+          const phaseProgress = Math.round((completedInPhase / totalInPhase) * 100);
 
           return (
-            <div key={phaseNum} className="relative space-y-4">
+            <div key={phaseNum} className="bg-surface border border-slate-200 rounded-lg p-6 shadow-subtle">
               {/* Phase Header */}
-              <div className="flex items-center space-x-3 bg-surface border border-border rounded-xl p-4 shadow-2xs z-10 relative">
-                <div className="w-10 h-10 rounded-xl bg-primary text-white font-extrabold flex items-center justify-center text-sm shadow-xs shrink-0">
-                  P{phaseNum}
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-base font-bold text-text-main">{phaseData.title}</h3>
-                  <div className="text-xs text-text-muted flex items-center space-x-3 mt-0.5">
-                    <span>{completedInPhase} of {totalInPhase} milestones completed</span>
-                    <span>•</span>
-                    <span>Est. {totalInPhase * 2} hours</span>
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-md bg-slate-900 text-white font-extrabold text-xs flex items-center justify-center font-mono">
+                    0{phaseNum}
                   </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">{phase.title}</h3>
+                    <div className="text-[11px] text-slate-500 font-medium">
+                      {completedInPhase} of {totalInPhase} milestones completed ({phaseProgress}%)
+                    </div>
+                  </div>
+                </div>
+
+                <div className="w-24 bg-slate-100 h-2 rounded-full overflow-hidden">
+                  <div
+                    className="bg-primary h-full rounded-full transition-all duration-500"
+                    style={{ width: `${phaseProgress}%` }}
+                  />
                 </div>
               </div>
 
-              {/* Phase Steps */}
-              <div className="ml-0 md:ml-12 space-y-4">
-                {phaseData.steps.map((step) => {
-                  const isCompleted = step.status === 'COMPLETED';
-                  const isInProgress = step.status === 'IN_PROGRESS';
-
+              {/* Steps List */}
+              <div className="space-y-3">
+                {phase.steps.map((step) => {
+                  const isSelected = selectedStep?.id === step.id;
                   return (
                     <div
                       key={step.id}
-                      className={`bg-surface border rounded-2xl p-5 shadow-2xs transition-all relative ${
-                        isInProgress
-                          ? 'border-2 border-primary/40 bg-gradient-to-r from-primary-soft/30 via-white to-white'
-                          : 'border-border'
+                      className={`border rounded-md p-4 transition-all ${
+                        step.status === 'COMPLETED'
+                          ? 'bg-emerald-50/40 border-emerald-200'
+                          : step.status === 'IN_PROGRESS'
+                          ? 'bg-indigo-50/40 border-primary/40'
+                          : 'bg-surface border-slate-200'
                       }`}
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
-                        <div className="flex items-center space-x-3">
-                          <div
-                            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs shrink-0 font-bold ${
-                              isCompleted
-                                ? 'bg-emerald-100 text-emerald-700'
-                                : isInProgress
-                                ? 'bg-primary text-white animate-pulse'
-                                : 'bg-gray-100 text-text-muted'
-                            }`}
-                          >
-                            {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : step.step_order}
-                          </div>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="flex items-start space-x-3">
+                          {step.status === 'COMPLETED' ? (
+                            <CheckCircle2 className="w-5 h-5 text-semantic-success shrink-0 mt-0.5" />
+                          ) : step.status === 'IN_PROGRESS' ? (
+                            <Clock className="w-5 h-5 text-primary shrink-0 mt-0.5 animate-pulse" />
+                          ) : (
+                            <div className="w-5 h-5 rounded-full border-2 border-slate-300 shrink-0 mt-0.5" />
+                          )}
 
                           <div>
-                            <h4 className="text-base font-bold text-text-main flex items-center space-x-2">
-                              <span>{step.skill_name}</span>
-                              <span
-                                className={`text-[10px] uppercase font-semibold px-2 py-0.5 rounded ${
-                                  isCompleted
-                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                    : isInProgress
-                                    ? 'bg-indigo-50 text-primary border border-indigo-200'
-                                    : 'bg-gray-100 text-text-muted'
-                                }`}
-                              >
-                                {step.status}
+                            <div className="flex items-center space-x-2">
+                              <h4 className="text-xs font-bold text-slate-900">
+                                {step.step_order}. {step.skill_name}
+                              </h4>
+                              <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-600">
+                                {step.difficulty}
                               </span>
-                            </h4>
+                              {step.status === 'IN_PROGRESS' && (
+                                <span className="text-[10px] font-bold text-primary bg-primary-soft px-2 py-0.5 rounded uppercase">
+                                  Current Focus
+                                </span>
+                              )}
+                            </div>
+
+                            <p className="text-xs text-slate-600 mt-1 line-clamp-1">
+                              {step.reason || `Essential requirement for ${activePath.career_title} path.`}
+                            </p>
                           </div>
                         </div>
 
-                        <div className="flex items-center space-x-2 text-xs">
-                          <span className="text-text-muted flex items-center">
-                            <Clock className="w-3.5 h-3.5 mr-1" />
-                            {step.estimated_minutes} mins
-                          </span>
+                        <div className="flex items-center space-x-2 self-end sm:self-auto shrink-0">
+                          <button
+                            onClick={() => {
+                              setWhyThisSkill({ name: step.skill_name, reason: step.reason });
+                              setWhyThisOpen(true);
+                            }}
+                            className="text-xs font-medium text-slate-500 hover:text-primary flex items-center space-x-1 px-2 py-1 rounded hover:bg-slate-100 transition-colors"
+                          >
+                            <HelpCircle className="w-3.5 h-3.5" />
+                            <span>Why this?</span>
+                          </button>
 
                           <button
-                            onClick={() => setWhyThisStep(step)}
-                            className="text-xs text-primary font-semibold flex items-center hover:underline bg-primary-soft px-2.5 py-1 rounded-lg"
+                            onClick={() => setSelectedStep(isSelected ? null : step)}
+                            className="text-xs font-semibold text-primary hover:bg-primary-soft px-3 py-1 rounded border border-primary/20 transition-colors flex items-center space-x-1"
                           >
-                            <HelpCircle className="w-3.5 h-3.5 mr-1" />
-                            Why this?
+                            <span>{isSelected ? 'Hide Details' : 'View Details'}</span>
+                            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isSelected ? 'rotate-180' : ''}`} />
                           </button>
                         </div>
                       </div>
 
-                      {/* Explanation Reason */}
-                      <p className="text-xs text-text-muted mb-4 leading-relaxed bg-gray-50 p-2.5 rounded-lg border border-gray-100 italic">
-                        "{step.reason}"
-                      </p>
-
-                      {/* Resources & Projects Grid */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                        {step.resources.map((res) => (
-                          <a
-                            key={res.id}
-                            href={res.url || '#'}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="bg-surface hover:bg-gray-50 border border-border p-3 rounded-xl transition-all flex items-start space-x-3 group"
-                          >
-                            <BookOpen className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                            <div className="flex-1 min-w-0">
-                              <div className="text-xs font-bold text-text-main truncate group-hover:text-primary transition-colors">
-                                {res.title}
+                      {/* Progressive Disclosure Details Panel */}
+                      {isSelected && (
+                        <div className="mt-4 pt-4 border-t border-slate-200 text-xs space-y-4 animate-in fade-in duration-150">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Resources Column */}
+                            <div>
+                              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                                Recommended Resources ({step.resources.length})
                               </div>
-                              <div className="text-[11px] text-text-muted mt-0.5">
-                                {res.provider} • {res.type} ({res.duration_minutes} mins)
+                              <div className="space-y-2">
+                                {step.resources.map((res) => (
+                                  <div key={res.id} className="bg-white border border-slate-200 rounded p-2.5 flex items-start justify-between">
+                                    <div>
+                                      <div className="font-semibold text-slate-900">{res.title}</div>
+                                      <div className="text-[11px] text-slate-500">{res.provider} · {res.type} · {res.duration_minutes} mins</div>
+                                    </div>
+                                    {res.url && (
+                                      <a
+                                        href={res.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-primary hover:text-primary-dark p-1"
+                                      >
+                                        <ExternalLink className="w-4 h-4" />
+                                      </a>
+                                    )}
+                                  </div>
+                                ))}
                               </div>
                             </div>
-                            <ExternalLink className="w-3.5 h-3.5 text-text-muted group-hover:text-primary shrink-0" />
-                          </a>
-                        ))}
 
-                        {step.project && (
-                          <div className="bg-surface border border-primary/20 p-3 rounded-xl flex items-start space-x-3">
-                            <FolderGit2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                            <div>
-                              <div className="text-xs font-bold text-text-main">
-                                Project: {step.project.title}
-                              </div>
-                              <div className="text-[11px] text-text-muted mt-0.5">
-                                {step.project.objective}
-                              </div>
+                            {/* Project & Assessment Column */}
+                            <div className="space-y-3">
+                              {step.project && (
+                                <div>
+                                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                                    Milestone Project
+                                  </div>
+                                  <div className="bg-white border border-slate-200 rounded p-2.5">
+                                    <div className="font-semibold text-slate-900">{step.project.title}</div>
+                                    <div className="text-[11px] text-slate-600 mt-1">{step.project.objective}</div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {step.assessment_id && (
+                                <div>
+                                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                                    Verification Assessment
+                                  </div>
+                                  <button
+                                    onClick={() => {
+                                      setActiveAssessmentId(step.assessment_id!);
+                                      setAssessmentOpen(true);
+                                    }}
+                                    className="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-2 rounded text-xs transition-colors flex items-center justify-center space-x-1.5"
+                                  >
+                                    <Award className="w-4 h-4" />
+                                    <span>Take Micro-Assessment</span>
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           </div>
-                        )}
-                      </div>
-
-                      {/* Actions Footer */}
-                      <div className="flex flex-wrap items-center justify-between pt-3 border-t border-border gap-2">
-                        <div className="flex items-center space-x-2">
-                          {step.assessment_id && (
-                            <button
-                              onClick={() => handleOpenAssessment(step.assessment_id!)}
-                              className="bg-primary hover:bg-primary-dark text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 shadow-2xs transition-colors"
-                            >
-                              <Award className="w-3.5 h-3.5" />
-                              <span>Take Micro-Assessment</span>
-                            </button>
-                          )}
                         </div>
-
-                        <button
-                          onClick={() => setFeedbackStep(step)}
-                          className="text-xs font-semibold text-text-muted hover:text-text-main flex items-center space-x-1 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors"
-                        >
-                          <MessageSquare className="w-3.5 h-3.5" />
-                          <span>How confident are you?</span>
-                        </button>
-                      </div>
+                      )}
                     </div>
                   );
                 })}
@@ -221,39 +245,21 @@ export const RoadmapPage: React.FC = () => {
         })}
       </div>
 
-      {/* Why This Modal */}
-      {whyThisStep && (
-        <WhyThisModal
-          isOpen={!!whyThisStep}
-          onClose={() => setWhyThisStep(null)}
-          skillName={whyThisStep.skill_name}
-          reason={whyThisStep.reason}
-          careerTitle={activePath?.career_title}
-        />
-      )}
+      {/* Modals */}
+      <WhyThisModal
+        isOpen={whyThisOpen}
+        onClose={() => setWhyThisOpen(false)}
+        skillName={whyThisSkill.name}
+        reason={whyThisSkill.reason}
+        careerTitle={activePath.career_title}
+      />
 
-      {/* Assessment Modal */}
-      {activeAssessment && (
-        <AssessmentModal
-          isOpen={!!activeAssessment}
-          onClose={() => setActiveAssessment(null)}
-          assessment={activeAssessment}
-          onComplete={() => {
-            refreshState();
-          }}
-        />
-      )}
-
-      {/* Feedback Modal */}
-      {feedbackStep && (
-        <FeedbackModal
-          isOpen={!!feedbackStep}
-          onClose={() => setFeedbackStep(null)}
-          skillId={feedbackStep.skill_id}
-          skillName={feedbackStep.skill_name}
-          onSubmitted={() => refreshState()}
-        />
-      )}
+      <AssessmentModal
+        isOpen={assessmentOpen}
+        onClose={() => setAssessmentOpen(false)}
+        assessmentId={activeAssessmentId}
+        onCompleted={refreshState}
+      />
     </div>
   );
 };

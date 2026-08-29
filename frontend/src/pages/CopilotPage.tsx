@@ -1,144 +1,129 @@
 import React, { useState } from 'react';
 import { api } from '../services/api';
 import { useLearner } from '../context/LearnerContext';
-import { MessageSquareCode, Send, Sparkles, User, Bot, Loader2, ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { MessageSquareCode, Send, Sparkles, ShieldCheck, User, Bot, Clock } from 'lucide-react';
+
+interface ChatMessage {
+  sender: 'user' | 'ai';
+  text: string;
+}
 
 export const CopilotPage: React.FC = () => {
-  const navigate = useNavigate();
   const { dashboard } = useLearner();
-
-  const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<Array<{ sender: 'user' | 'ai'; message: string; actions?: string[] }>>([
+  const [messages, setMessages] = useState<ChatMessage[]>([
     {
       sender: 'ai',
-      message: `Hello Alex! I am your ground-truth AI Copilot. I have full live visibility into your target career (${dashboard?.target_career.title || 'AI Engineer'}), your 64% readiness score, and your next milestone ('Model Evaluation'). How can I help navigate your path today?`,
-      actions: ['What should I learn today?', 'Why is Model Evaluation recommended?', 'What project should I build?'],
+      text: `Hello Alex! I'm grounded in your live learner profile for ${dashboard?.target_career.title || 'AI Engineer'} (${Math.round(dashboard?.readiness_score || 64)}% readiness). How can I assist your career path today?`,
     },
   ]);
-  const [loading, setLoading] = useState(false);
+  const [input, setInput] = useState('');
+  const [sending, setSending] = useState(false);
 
-  const promptChips = [
+  const quickPrompts = [
     'What should I learn today?',
     'Why is Model Evaluation recommended?',
-    'Can I skip anything?',
-    'What project should I build?',
-    'I only have 3 hours this week. What should I do?',
+    'How can I reach my goal faster?',
+    'What if I switch to Data Scientist?',
   ];
 
-  const handleSend = async (textToSend?: string) => {
-    const query = textToSend || input;
-    if (!query.trim() || loading) return;
+  const handleSend = async (msgText?: string) => {
+    const textToSend = msgText || input;
+    if (!textToSend.trim() || sending) return;
 
-    setInput('');
-    setMessages((prev) => [...prev, { sender: 'user', message: query }]);
-    setLoading(true);
+    setMessages((prev) => [...prev, { sender: 'user', text: textToSend }]);
+    if (!msgText) setInput('');
+    setSending(true);
 
     try {
-      const res = await api.sendChatMessage(query);
-      setMessages((prev) => [
-        ...prev,
-        { sender: 'ai', message: res.reply, actions: res.suggested_actions },
-      ]);
+      const res = await api.sendChatMessage(textToSend);
+      setMessages((prev) => [...prev, { sender: 'ai', text: res.reply }]);
     } catch (err) {
-      console.error('Copilot Chat Error:', err);
       setMessages((prev) => [
         ...prev,
-        {
-          sender: 'ai',
-          message: 'PathFinder AI Copilot is currently operating in offline mode. Based on your live state, we recommend focusing on Model Evaluation today.',
-        },
+        { sender: 'ai', text: 'PathFinder Copilot is operating in offline fallback mode. Check your personalized roadmap for immediate recommendations.' },
       ]);
     } finally {
-      setLoading(false);
+      setSending(false);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      {/* Header */}
-      <div className="border-b border-border pb-4">
-        <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-primary-soft text-primary font-semibold text-xs mb-2">
-          <MessageSquareCode className="w-3.5 h-3.5" />
-          <span>GROUNDED AI CAREER COPILOT</span>
+    <div className="space-y-6">
+      {/* Header with Live Learner Context */}
+      <div className="bg-surface border border-slate-200 rounded-lg p-6 shadow-subtle flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="text-[10px] font-extrabold text-primary uppercase tracking-widest mb-1">
+            CONTEXT-GROUNDED CAREER ASSISTANT
+          </div>
+          <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+            PathFinder AI Career Copilot
+          </h2>
+          <p className="text-xs text-slate-600 mt-1">
+            Grounded in live readiness scores, active skill gaps, satisfied prerequisites, and roadmap state
+          </p>
         </div>
-        <h1 className="text-3xl font-extrabold text-text-main tracking-tight">
-          AI Career Navigation Assistant
-        </h1>
-        <p className="text-xs text-text-muted mt-1">
-          Grounded in your live learner profile, prerequisite graph, and current skill gaps.
-        </p>
+
+        {/* Live Context Badge */}
+        <div className="bg-slate-50 border border-slate-200 rounded-md p-3 text-xs flex items-center space-x-3">
+          <div>
+            <div className="text-[10px] font-bold text-slate-400 uppercase">Live Context</div>
+            <div className="font-bold text-slate-900">{dashboard?.target_career.title}</div>
+          </div>
+          <div className="border-l border-slate-200 pl-3">
+            <div className="text-[10px] font-bold text-slate-400 uppercase">Readiness</div>
+            <div className="font-mono font-bold text-primary">{Math.round(dashboard?.readiness_score || 64)}%</div>
+          </div>
+        </div>
       </div>
 
-      {/* Chat Messages Box */}
-      <div className="bg-surface border border-border rounded-2xl p-6 shadow-2xs h-[500px] flex flex-col justify-between">
-        <div className="overflow-y-auto space-y-4 pr-2">
-          {messages.map((m, idx) => (
+      {/* Main Chat Interface */}
+      <div className="bg-surface border border-slate-200 rounded-lg shadow-subtle flex flex-col h-[520px]">
+        {/* Messages Scroll Area */}
+        <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4">
+          {messages.map((msg, idx) => (
             <div
               key={idx}
-              className={`flex items-start space-x-3 ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex items-start space-x-3 max-w-3xl ${
+                msg.sender === 'user' ? 'ml-auto flex-row-reverse space-x-reverse' : ''
+              }`}
             >
-              {m.sender === 'ai' && (
-                <div className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
-                  <Bot className="w-4 h-4" />
-                </div>
-              )}
-
               <div
-                className={`max-w-xl p-4 rounded-2xl text-xs leading-relaxed ${
-                  m.sender === 'user'
-                    ? 'bg-primary text-white font-medium rounded-br-none'
-                    : 'bg-gray-50 border border-gray-200 text-text-main rounded-bl-none'
+                className={`w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold shrink-0 ${
+                  msg.sender === 'user' ? 'bg-slate-800 text-white' : 'bg-primary text-white'
                 }`}
               >
-                <div className="whitespace-pre-wrap">{m.message}</div>
-
-                {m.actions && m.actions.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-gray-200/60 flex flex-wrap gap-2">
-                    {m.actions.map((act, actIdx) => (
-                      <button
-                        key={actIdx}
-                        onClick={() => {
-                          if (act.includes('Roadmap')) navigate('/roadmap');
-                          else if (act.includes('Simulator')) navigate('/simulator');
-                          else handleSend(act);
-                        }}
-                        className="bg-white hover:bg-gray-100 text-primary border border-primary/20 px-2.5 py-1 rounded-lg font-semibold text-[11px] shadow-2xs transition-colors flex items-center space-x-1"
-                      >
-                        <span>{act}</span>
-                        <ArrowRight className="w-3 h-3" />
-                      </button>
-                    ))}
-                  </div>
-                )}
+                {msg.sender === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
               </div>
 
-              {m.sender === 'user' && (
-                <div className="w-8 h-8 rounded-lg bg-gray-200 text-text-main flex items-center justify-center font-bold text-xs shrink-0">
-                  <User className="w-4 h-4" />
-                </div>
-              )}
+              <div
+                className={`p-3.5 rounded-lg text-xs leading-relaxed ${
+                  msg.sender === 'user'
+                    ? 'bg-slate-900 text-white font-medium'
+                    : 'bg-slate-50 text-slate-900 border border-slate-200 font-normal'
+                }`}
+              >
+                {msg.text}
+              </div>
             </div>
           ))}
-
-          {loading && (
-            <div className="flex items-center space-x-2 text-primary font-semibold text-xs">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Analyzing live context state...</span>
+          {sending && (
+            <div className="flex items-center space-x-2 text-xs text-slate-400 animate-pulse">
+              <Bot className="w-4 h-4 text-primary" />
+              <span>Copilot is analyzing profile context...</span>
             </div>
           )}
         </div>
 
-        {/* Input & Prompt Chips */}
-        <div className="pt-4 border-t border-border space-y-3">
+        {/* Quick Prompts & Input Bar */}
+        <div className="p-4 border-t border-slate-200 bg-slate-50/50 space-y-3">
           <div className="flex flex-wrap gap-2">
-            {promptChips.map((chip, idx) => (
+            {quickPrompts.map((prompt, pIdx) => (
               <button
-                key={idx}
-                onClick={() => handleSend(chip)}
-                className="bg-primary-soft/60 hover:bg-primary-soft text-primary px-3 py-1 rounded-full text-xs font-semibold border border-primary/20 transition-colors"
+                key={pIdx}
+                onClick={() => handleSend(prompt)}
+                className="text-[11px] font-medium bg-surface hover:bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-1 rounded transition-colors"
               >
-                {chip}
+                {prompt}
               </button>
             ))}
           </div>
@@ -149,13 +134,13 @@ export const CopilotPage: React.FC = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Ask Copilot what to learn today or why a skill is recommended..."
-              className="flex-1 text-xs p-3 rounded-xl border border-border focus:ring-2 focus:ring-primary focus:outline-none"
+              placeholder="Ask Copilot about your career path, skill gaps, or prerequisites..."
+              className="flex-1 p-2.5 rounded-md border border-slate-300 text-xs text-slate-900 focus:ring-2 focus:ring-primary focus:outline-none bg-surface"
             />
             <button
               onClick={() => handleSend()}
-              disabled={loading || !input.trim()}
-              className="bg-primary hover:bg-primary-dark text-white p-3 rounded-xl shadow-xs transition-colors"
+              disabled={!input.trim() || sending}
+              className="bg-primary hover:bg-primary-dark text-white p-2.5 rounded-md text-xs font-semibold shadow-subtle disabled:opacity-50 transition-colors"
             >
               <Send className="w-4 h-4" />
             </button>

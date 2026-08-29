@@ -1,164 +1,137 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 import { api } from '../services/api';
-import { SimulateCareerResponse, Career } from '../types';
-import { Sliders, Sparkles, ArrowRight, CheckCircle2, Clock, FolderGit2, RefreshCw } from 'lucide-react';
+import { useLearner } from '../context/LearnerContext';
+import { Career, SimulateCareerResponse } from '../types';
+import { Sliders, ArrowRight, CheckCircle2, Clock, ShieldCheck, RefreshCw } from 'lucide-react';
 
 export const WhatIfSimulatorPage: React.FC = () => {
-  const location = useLocation();
-  const initialTarget = (location.state as any)?.targetCareerId || 'c_data_scientist';
-
-  const [targetCareerId, setTargetCareerId] = useState<string>(initialTarget);
+  const { dashboard } = useLearner();
   const [careers, setCareers] = useState<Career[]>([]);
+  const [selectedCareerId, setSelectedCareerId] = useState<string>('c_data_scientist');
   const [simulation, setSimulation] = useState<SimulateCareerResponse | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.getCareers().then(setCareers);
-  }, []);
+    api.getCareers().then((res) => {
+      setCareers(res);
+      const filtered = res.filter((c) => c.id !== dashboard?.target_career.id);
+      if (filtered.length > 0) setSelectedCareerId(filtered[0].id);
+    });
+  }, [dashboard]);
 
-  const handleSimulate = async (cid?: string) => {
-    const idToSim = cid || targetCareerId;
-    try {
-      setLoading(true);
-      const res = await api.simulateCareer(idToSim);
+  useEffect(() => {
+    if (!selectedCareerId) return;
+    setLoading(true);
+    api.simulateCareer(selectedCareerId).then((res) => {
       setSimulation(res);
-    } catch (err) {
-      console.error('Career Simulation Error:', err);
-    } finally {
       setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    handleSimulate(initialTarget);
-  }, [initialTarget]);
+    });
+  }, [selectedCareerId]);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="border-b border-border pb-4">
-        <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-primary-soft text-primary font-semibold text-xs mb-2">
-          <Sliders className="w-3.5 h-3.5" />
-          <span>INNOVATION FEATURE</span>
-        </div>
-        <h1 className="text-3xl font-extrabold text-text-main tracking-tight">
-          What-if Career Simulator
-        </h1>
-        <p className="text-xs text-text-muted mt-1">
-          Explore what happens if you transition from your current career track to another field.
-        </p>
-      </div>
-
-      {/* Target Career Selector */}
-      <div className="bg-surface border border-border rounded-2xl p-6 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="bg-surface border border-slate-200 rounded-lg p-6 shadow-subtle flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <label className="block text-xs font-bold text-text-muted uppercase mb-1">
-            Simulate Switching Target Goal To:
-          </label>
+          <div className="text-[10px] font-extrabold text-primary uppercase tracking-widest mb-1">
+            DECISION-SUPPORT CAREER SIMULATOR
+          </div>
+          <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+            Explore a Different Career Path
+          </h2>
+          <p className="text-xs text-slate-600 mt-1">
+            Analyze skill overlap %, transferable competencies, and estimated transition timelines before switching
+          </p>
+        </div>
+
+        {/* Target Career Dropdown Selector */}
+        <div className="flex items-center space-x-2">
+          <span className="text-xs font-semibold text-slate-500">Compare with:</span>
           <select
-            value={targetCareerId}
-            onChange={(e) => {
-              setTargetCareerId(e.target.value);
-              handleSimulate(e.target.value);
-            }}
-            className="p-3 rounded-xl border border-border text-sm font-bold text-text-main focus:ring-2 focus:ring-primary focus:outline-none"
+            value={selectedCareerId}
+            onChange={(e) => setSelectedCareerId(e.target.value)}
+            className="p-2 rounded-md border border-slate-300 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-primary focus:outline-none bg-surface shadow-subtle"
           >
             {careers.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.title} ({c.category})
+                {c.title}
               </option>
             ))}
           </select>
         </div>
-
-        <button
-          onClick={() => handleSimulate()}
-          className="bg-primary hover:bg-primary-dark text-white font-bold px-6 py-3 rounded-xl text-xs flex items-center space-x-2 shadow-xs transition-all"
-        >
-          {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-          <span>Run What-if Simulation</span>
-        </button>
       </div>
 
-      {/* Simulation Results */}
-      {simulation && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-surface border border-border rounded-2xl p-6 shadow-2xs text-center">
-              <span className="text-xs font-bold text-text-muted uppercase">Skill Overlap</span>
-              <div className="text-4xl font-extrabold text-primary my-2">
+      {/* Side-by-Side Simulation Results */}
+      {loading || !simulation ? (
+        <div className="h-64 bg-slate-200 animate-pulse rounded-lg" />
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Overlap Summary Card */}
+          <div className="bg-surface border border-slate-200 rounded-lg p-6 shadow-subtle flex flex-col justify-between">
+            <div>
+              <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">
+                SKILL OVERLAP MATCH
+              </div>
+
+              <div className="text-4xl font-extrabold text-slate-900 font-mono mb-2">
                 {simulation.skill_overlap_percentage}%
               </div>
-              <p className="text-xs text-text-muted">
-                Of your existing skills transfer directly to {simulation.target_career_title}
+
+              <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden mb-4">
+                <div
+                  className="bg-primary h-full rounded-full transition-all duration-700"
+                  style={{ width: `${simulation.skill_overlap_percentage}%` }}
+                />
+              </div>
+
+              <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                Your existing skill portfolio covers {simulation.skill_overlap_percentage}% of the requirements for <strong>{simulation.target_career_title}</strong>.
               </p>
             </div>
 
-            <div className="bg-surface border border-border rounded-2xl p-6 shadow-2xs text-center">
-              <span className="text-xs font-bold text-text-muted uppercase">Additional Effort</span>
-              <div className="text-4xl font-extrabold text-text-main my-2">
-                ~{simulation.estimated_additional_weeks} Wks
+            <div className="bg-slate-50 border border-slate-200 rounded-md p-3 text-xs">
+              <div className="font-semibold text-slate-900 mb-1 flex items-center">
+                <Clock className="w-3.5 h-3.5 mr-1 text-primary" />
+                Estimated Transition Timeline
               </div>
-              <p className="text-xs text-text-muted">
-                Estimated additional learning duration based on your 8 hrs/week
-              </p>
-            </div>
-
-            <div className="bg-surface border border-border rounded-2xl p-6 shadow-2xs text-center">
-              <span className="text-xs font-bold text-text-muted uppercase">New Skills Required</span>
-              <div className="text-4xl font-extrabold text-amber-600 my-2">
-                {simulation.new_skills_required.length}
+              <div className="text-slate-600 font-mono font-bold text-sm">
+                +{simulation.estimated_additional_weeks} weeks <span className="text-slate-400 text-xs font-normal">(at 8 hrs/week)</span>
               </div>
-              <p className="text-xs text-text-muted">
-                New specialized skills needed to reach 100% readiness
-              </p>
             </div>
           </div>
 
-          {/* Shared vs New Skills Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-surface border border-border rounded-2xl p-6 shadow-2xs">
-              <h4 className="text-sm font-bold text-text-main flex items-center space-x-2 mb-4">
-                <CheckCircle2 className="w-4 h-4 text-semantic-success" />
-                <span>Shared Transferable Skills ({simulation.shared_skills.length})</span>
-              </h4>
-              <div className="flex flex-wrap gap-2">
+          {/* Transferable Skills vs New Skills Grid */}
+          <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* Transferable Skills */}
+            <div className="bg-surface border border-slate-200 rounded-lg p-6 shadow-subtle">
+              <div className="text-[10px] font-extrabold text-semantic-success uppercase tracking-widest mb-3">
+                TRANSFERABLE SKILLS YOU ALREADY HAVE ({simulation.shared_skills.length})
+              </div>
+
+              <div className="space-y-2">
                 {simulation.shared_skills.map((s, idx) => (
-                  <span key={idx} className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-lg text-xs font-semibold">
-                    {s}
-                  </span>
+                  <div key={idx} className="bg-emerald-50/60 border border-emerald-200 text-emerald-900 text-xs font-medium p-2.5 rounded flex items-center justify-between">
+                    <span>{s}</span>
+                    <CheckCircle2 className="w-4 h-4 text-semantic-success" />
+                  </div>
                 ))}
               </div>
             </div>
 
-            <div className="bg-surface border border-border rounded-2xl p-6 shadow-2xs">
-              <h4 className="text-sm font-bold text-text-main flex items-center space-x-2 mb-4">
-                <Clock className="w-4 h-4 text-amber-600" />
-                <span>New Required Skills ({simulation.new_skills_required.length})</span>
-              </h4>
-              <div className="flex flex-wrap gap-2">
+            {/* New Skills to Acquire */}
+            <div className="bg-surface border border-slate-200 rounded-lg p-6 shadow-subtle">
+              <div className="text-[10px] font-extrabold text-semantic-warning uppercase tracking-widest mb-3">
+                NEW SKILLS TO ACQUIRE ({simulation.new_skills_required.length})
+              </div>
+
+              <div className="space-y-2">
                 {simulation.new_skills_required.map((s, idx) => (
-                  <span key={idx} className="bg-amber-50 text-amber-900 border border-amber-200 px-3 py-1 rounded-lg text-xs font-semibold">
-                    {s}
-                  </span>
+                  <div key={idx} className="bg-amber-50/60 border border-amber-200 text-amber-900 text-xs font-medium p-2.5 rounded flex items-center justify-between">
+                    <span>{s}</span>
+                    <ArrowRight className="w-4 h-4 text-amber-600" />
+                  </div>
                 ))}
               </div>
-            </div>
-          </div>
-
-          {/* Recommended Transition Projects */}
-          <div className="bg-surface border border-border rounded-2xl p-6 shadow-2xs">
-            <h4 className="text-sm font-bold text-text-main flex items-center space-x-2 mb-3">
-              <FolderGit2 className="w-4 h-4 text-primary" />
-              <span>Recommended Portfolio Projects for {simulation.target_career_title} Transition</span>
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {simulation.recommended_projects.map((p, idx) => (
-                <div key={idx} className="bg-primary-soft/40 border border-primary/20 p-3 rounded-xl text-xs font-bold text-text-main">
-                  {p}
-                </div>
-              ))}
             </div>
           </div>
         </div>

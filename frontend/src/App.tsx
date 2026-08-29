@@ -2,8 +2,8 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { LearnerProvider } from './context/LearnerContext';
 import { Navbar } from './components/Navbar';
-import { JudgeDemoBanner } from './components/JudgeDemoBanner';
 import { Footer } from './components/Footer';
+import { AppLayout } from './components/AppLayout';
 
 import { LandingPage } from './pages/LandingPage';
 import { OnboardingPage } from './pages/OnboardingPage';
@@ -20,27 +20,99 @@ export const App: React.FC = () => {
   return (
     <BrowserRouter>
       <LearnerProvider>
-        <div className="min-h-screen flex flex-col justify-between bg-background font-sans text-text-main antialiased selection:bg-primary-soft selection:text-primary">
-          <div>
-            <JudgeDemoBanner />
-            <Navbar />
-            <main>
-              <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/onboarding" element={<OnboardingPage />} />
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/roadmap" element={<RoadmapPage />} />
-                <Route path="/skills" element={<SkillGraphPage />} />
-                <Route path="/careers" element={<CareersPage />} />
-                <Route path="/assessment" element={<AssessmentPage />} />
-                <Route path="/copilot" element={<CopilotPage />} />
-                <Route path="/simulator" element={<WhatIfSimulatorPage />} />
-                <Route path="/architecture" element={<ArchitecturePage />} />
-              </Routes>
-            </main>
-          </div>
-          <Footer />
-        </div>
+        <Routes>
+          {/* Public Landing & Onboarding Layout */}
+          <Route
+            path="/"
+            element={
+              <div className="min-h-screen flex flex-col justify-between bg-background">
+                <Navbar />
+                <main className="flex-1">
+                  <LandingPage />
+                </main>
+                <Footer />
+              </div>
+            }
+          />
+          <Route
+            path="/onboarding"
+            element={
+              <div className="min-h-screen flex flex-col justify-between bg-background">
+                <Navbar />
+                <main className="flex-1">
+                  <OnboardingPage />
+                </main>
+                <Footer />
+              </div>
+            }
+          />
+
+          {/* Enterprise Application SaaS Layout (Left Sidebar + Header) */}
+          <Route
+            path="/dashboard"
+            element={
+              <AppLayout>
+                <DashboardPage />
+              </AppLayout>
+            }
+          />
+          <Route
+            path="/roadmap"
+            element={
+              <AppLayout>
+                <RoadmapPage />
+              </AppLayout>
+            }
+          />
+          <Route
+            path="/skills"
+            element={
+              <AppLayout>
+                <SkillGraphPage />
+              </AppLayout>
+            }
+          />
+          <Route
+            path="/careers"
+            element={
+              <AppLayout>
+                <CareersPage />
+              </AppLayout>
+            }
+          />
+          <Route
+            path="/assessment"
+            element={
+              <AppLayout>
+                <AssessmentPage />
+              </AppLayout>
+            }
+          />
+          <Route
+            path="/copilot"
+            element={
+              <AppLayout>
+                <CopilotPage />
+              </AppLayout>
+            }
+          />
+          <Route
+            path="/simulator"
+            element={
+              <AppLayout>
+                <WhatIfSimulatorPage />
+              </AppLayout>
+            }
+          />
+          <Route
+            path="/architecture"
+            element={
+              <AppLayout>
+                <ArchitecturePage />
+              </AppLayout>
+            }
+          />
+        </Routes>
       </LearnerProvider>
     </BrowserRouter>
   );
