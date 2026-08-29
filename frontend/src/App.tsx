@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { LearnerProvider } from './context/LearnerContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
-import { AppLayout } from './components/AppLayout';
+import { AppShell } from './components/layout/AppShell';
 
 import { LandingPage } from './pages/LandingPage';
 import { OnboardingPage } from './pages/OnboardingPage';
@@ -21,11 +21,11 @@ export const App: React.FC = () => {
     <BrowserRouter>
       <LearnerProvider>
         <Routes>
-          {/* Public Landing & Onboarding Layout */}
+          {/* Public Landing & Onboarding */}
           <Route
             path="/"
             element={
-              <div className="min-h-screen flex flex-col justify-between bg-background">
+              <div className="min-h-screen flex flex-col justify-between bg-[var(--bg)] font-sans text-[var(--text-primary)]">
                 <Navbar />
                 <main className="flex-1">
                   <LandingPage />
@@ -37,7 +37,7 @@ export const App: React.FC = () => {
           <Route
             path="/onboarding"
             element={
-              <div className="min-h-screen flex flex-col justify-between bg-background">
+              <div className="min-h-screen flex flex-col justify-between bg-[var(--bg)] font-sans text-[var(--text-primary)]">
                 <Navbar />
                 <main className="flex-1">
                   <OnboardingPage />
@@ -47,69 +47,69 @@ export const App: React.FC = () => {
             }
           />
 
-          {/* Enterprise Application SaaS Layout (Left Sidebar + Header) */}
+          {/* Internal Workspace Routes wrapped in AppShell */}
           <Route
             path="/dashboard"
             element={
-              <AppLayout>
+              <AppShell>
                 <DashboardPage />
-              </AppLayout>
+              </AppShell>
             }
           />
           <Route
             path="/roadmap"
             element={
-              <AppLayout>
+              <AppShell>
                 <RoadmapPage />
-              </AppLayout>
+              </AppShell>
             }
           />
           <Route
             path="/skills"
             element={
-              <AppLayout>
+              <AppShell>
                 <SkillGraphPage />
-              </AppLayout>
+              </AppShell>
             }
           />
           <Route
             path="/careers"
             element={
-              <AppLayout>
+              <AppShell>
                 <CareersPage />
-              </AppLayout>
+              </AppShell>
             }
           />
           <Route
             path="/assessment"
             element={
-              <AppLayout>
+              <AppShell>
                 <AssessmentPage />
-              </AppLayout>
+              </AppShell>
             }
           />
           <Route
             path="/copilot"
             element={
-              <AppLayout>
+              <AppShell>
                 <CopilotPage />
-              </AppLayout>
+              </AppShell>
             }
           />
           <Route
             path="/simulator"
             element={
-              <AppLayout>
+              <AppShell>
                 <WhatIfSimulatorPage />
-              </AppLayout>
+              </AppShell>
             }
           />
           <Route
             path="/architecture"
             element={
-              <AppLayout>
+              <AppShell>
                 <ArchitecturePage />
-              </AppLayout>
+              </AppShell>
             }
           />
         </Routes>

@@ -4,6 +4,9 @@ import { api } from '../services/api';
 import { useLearner } from '../context/LearnerContext';
 import { ProfileExtractResponse } from '../types';
 import { ArrowRight, CheckCircle2, Loader2, Edit3, ShieldCheck } from 'lucide-react';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { Badge } from '../components/ui/Badge';
 
 export const OnboardingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -72,23 +75,23 @@ export const OnboardingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 bg-background">
-      <div className="max-w-2xl w-full bg-surface border border-slate-200 rounded-lg p-8 shadow-card">
+    <div className="min-h-[85vh] flex items-center justify-center py-12 px-8 bg-[var(--bg)]">
+      <Card className="max-w-2xl w-full">
         {/* Step Indicator */}
-        <div className="flex items-center justify-between border-b border-slate-200 pb-6 mb-8">
-          <div className="flex items-center space-x-2">
-            <div className={`w-7 h-7 rounded-md flex items-center justify-center font-bold text-xs ${step >= 1 ? 'bg-primary text-white' : 'bg-slate-100 text-slate-400'}`}>1</div>
-            <span className="text-xs font-semibold text-slate-800">Background Input</span>
+        <div className="flex items-center justify-between border-b border-[var(--border)] pb-6 mb-8">
+          <div className="flex items-center gap-2">
+            <div className={`w-6 h-6 rounded-[var(--radius-sm)] flex items-center justify-center font-bold text-xs ${step >= 1 ? 'bg-[var(--brand)] text-white' : 'bg-[var(--surface-sunken)] text-[var(--text-tertiary)]'}`}>1</div>
+            <span className="text-xs font-semibold text-[var(--text-primary)]">Background Input</span>
           </div>
-          <div className="w-12 h-0.5 bg-slate-200" />
-          <div className="flex items-center space-x-2">
-            <div className={`w-7 h-7 rounded-md flex items-center justify-center font-bold text-xs ${step >= 2 ? 'bg-primary text-white' : 'bg-slate-100 text-slate-400'}`}>2</div>
-            <span className="text-xs font-semibold text-slate-800">Confirm Profile</span>
+          <div className="w-12 h-0.5 bg-[var(--border)]" />
+          <div className="flex items-center gap-2">
+            <div className={`w-6 h-6 rounded-[var(--radius-sm)] flex items-center justify-center font-bold text-xs ${step >= 2 ? 'bg-[var(--brand)] text-white' : 'bg-[var(--surface-sunken)] text-[var(--text-tertiary)]'}`}>2</div>
+            <span className="text-xs font-semibold text-[var(--text-primary)]">Confirm Profile</span>
           </div>
-          <div className="w-12 h-0.5 bg-slate-200" />
-          <div className="flex items-center space-x-2">
-            <div className={`w-7 h-7 rounded-md flex items-center justify-center font-bold text-xs ${step >= 3 ? 'bg-primary text-white' : 'bg-slate-100 text-slate-400'}`}>3</div>
-            <span className="text-xs font-semibold text-slate-800">Build Path</span>
+          <div className="w-12 h-0.5 bg-[var(--border)]" />
+          <div className="flex items-center gap-2">
+            <div className={`w-6 h-6 rounded-[var(--radius-sm)] flex items-center justify-center font-bold text-xs ${step >= 3 ? 'bg-[var(--brand)] text-white' : 'bg-[var(--surface-sunken)] text-[var(--text-tertiary)]'}`}>3</div>
+            <span className="text-xs font-semibold text-[var(--text-primary)]">Build Path</span>
           </div>
         </div>
 
@@ -96,14 +99,16 @@ export const OnboardingPage: React.FC = () => {
         {step === 1 && (
           <div className="space-y-6">
             <div>
-              <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded bg-primary-soft text-primary text-[11px] font-bold mb-3">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Layer 1: NLP Profile Parser</span>
+              <div className="mb-3">
+                <Badge tone="brand">
+                  <ShieldCheck className="w-3.5 h-3.5 mr-1" />
+                  NLP PROFILE PARSER
+                </Badge>
               </div>
-              <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+              <h2 className="text-xl font-bold text-[var(--text-primary)]">
                 Tell us about your background & career goals
               </h2>
-              <p className="text-xs text-slate-600 mt-1">
+              <p className="text-xs text-[var(--text-secondary)] mt-1">
                 Describe your current experience, skills you already know, target role, and time budget.
               </p>
             </div>
@@ -114,15 +119,16 @@ export const OnboardingPage: React.FC = () => {
                 onChange={(e) => setInputText(e.target.value)}
                 rows={5}
                 placeholder="Tell us where you are, what you know, and where you want to go..."
-                className="w-full p-4 rounded-md border border-slate-300 focus:ring-2 focus:ring-primary focus:outline-none text-xs text-slate-900 leading-relaxed font-sans"
+                className="w-full p-4 rounded-[var(--radius-sm)] border border-[var(--border-strong)] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand)] leading-relaxed"
               />
             </div>
 
             <div className="flex justify-end">
-              <button
+              <Button
+                size="md"
+                variant="primary"
                 disabled={analyzing || !inputText.trim()}
                 onClick={handleAnalyze}
-                className="bg-primary hover:bg-primary-dark text-white font-semibold px-6 py-2.5 rounded-md text-xs transition-colors flex items-center space-x-2 shadow-subtle disabled:opacity-50"
               >
                 {analyzing ? (
                   <>
@@ -135,7 +141,7 @@ export const OnboardingPage: React.FC = () => {
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -144,22 +150,22 @@ export const OnboardingPage: React.FC = () => {
         {step === 2 && extracted && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-bold text-slate-900 tracking-tight flex items-center space-x-2">
+              <h2 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
                 <span>Confirm Learner Profile</span>
-                <Edit3 className="w-4 h-4 text-primary" />
+                <Edit3 className="w-4 h-4 text-[var(--brand)]" />
               </h2>
-              <p className="text-xs text-slate-600 mt-1">
+              <p className="text-xs text-[var(--text-secondary)] mt-1">
                 Review extracted specifications before building your custom roadmap.
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-extrabold text-slate-400 uppercase mb-1">Target Career Role</label>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">Target Career Role</label>
                 <select
                   value={targetCareerId}
                   onChange={(e) => setTargetCareerId(e.target.value)}
-                  className="w-full p-2.5 rounded-md border border-slate-300 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-primary focus:outline-none bg-surface"
+                  className="w-full p-2.5 rounded-[var(--radius-sm)] border border-[var(--border-strong)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand)] bg-[var(--surface)]"
                 >
                   <option value="c_ai_engineer">AI Engineer</option>
                   <option value="c_data_scientist">Data Scientist</option>
@@ -171,11 +177,11 @@ export const OnboardingPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-[10px] font-extrabold text-slate-400 uppercase mb-1">Experience Level</label>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">Experience Level</label>
                 <select
                   value={expLevel}
                   onChange={(e) => setExpLevel(e.target.value)}
-                  className="w-full p-2.5 rounded-md border border-slate-300 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-primary focus:outline-none bg-surface"
+                  className="w-full p-2.5 rounded-[var(--radius-sm)] border border-[var(--border-strong)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand)] bg-[var(--surface)]"
                 >
                   <option value="Beginner">Beginner</option>
                   <option value="Intermediate">Intermediate</option>
@@ -184,21 +190,21 @@ export const OnboardingPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-[10px] font-extrabold text-slate-400 uppercase mb-1">Weekly Time Budget (Hours)</label>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">Weekly Time Budget (Hours)</label>
                 <input
                   type="number"
                   value={weeklyHours}
                   onChange={(e) => setWeeklyHours(Number(e.target.value))}
-                  className="w-full p-2.5 rounded-md border border-slate-300 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-primary focus:outline-none"
+                  className="w-full p-2.5 rounded-[var(--radius-sm)] border border-[var(--border-strong)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand)]"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-extrabold text-slate-400 uppercase mb-1">Learning Format Preference</label>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">Learning Format Preference</label>
                 <select
                   value={preference}
                   onChange={(e) => setPreference(e.target.value)}
-                  className="w-full p-2.5 rounded-md border border-slate-300 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-primary focus:outline-none bg-surface"
+                  className="w-full p-2.5 rounded-[var(--radius-sm)] border border-[var(--border-strong)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand)] bg-[var(--surface)]"
                 >
                   <option value="Project Based">Project Based</option>
                   <option value="Video">Video Courses</option>
@@ -208,30 +214,24 @@ export const OnboardingPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-[10px] font-extrabold text-slate-400 uppercase mb-2">Detected Existing Skills</label>
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-2">Detected Existing Skills</label>
               <div className="flex flex-wrap gap-2">
                 {extracted.skills.map((s, idx) => (
-                  <span key={idx} className="bg-primary-soft text-primary px-2.5 py-1 rounded text-xs font-semibold border border-primary/10">
+                  <Badge key={idx} tone="brand">
                     {s.name} ({s.level})
-                  </span>
+                  </Badge>
                 ))}
               </div>
             </div>
 
-            <div className="flex justify-between items-center pt-4 border-t border-slate-200">
-              <button
-                onClick={() => setStep(1)}
-                className="text-xs font-semibold text-slate-500 hover:text-slate-900"
-              >
+            <div className="flex justify-between items-center pt-4 border-t border-[var(--border)]">
+              <Button size="sm" variant="ghost" onClick={() => setStep(1)}>
                 Back to Edit
-              </button>
-              <button
-                onClick={handleBuildPath}
-                className="bg-primary hover:bg-primary-dark text-white font-semibold px-6 py-2.5 rounded-md text-xs transition-colors flex items-center space-x-2 shadow-subtle"
-              >
+              </Button>
+              <Button size="md" variant="primary" onClick={handleBuildPath}>
                 <span>Generate My Path</span>
                 <ArrowRight className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -239,37 +239,37 @@ export const OnboardingPage: React.FC = () => {
         {/* Step 3: Build State */}
         {step === 3 && (
           <div className="py-8 text-center space-y-6">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-md bg-primary-soft text-primary mb-1">
-              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            <div className="inline-flex items-center justify-center w-10 h-10 rounded-[var(--radius-sm)] bg-[var(--brand-soft)] text-[var(--brand)] mb-1">
+              <Loader2 className="w-5 h-5 animate-spin" />
             </div>
 
-            <h3 className="text-lg font-bold text-slate-900">Building Your Custom Learning Path</h3>
+            <h3 className="text-base font-bold text-[var(--text-primary)]">Building Your Custom Learning Path</h3>
 
-            <div className="max-w-md mx-auto space-y-2.5 text-left text-xs font-medium">
-              <div className={`flex items-center justify-between p-3 rounded-md border ${buildProgress >= 1 ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
+            <div className="max-w-md mx-auto space-y-2 text-left text-xs font-medium">
+              <div className={`flex items-center justify-between p-3 rounded-[var(--radius-sm)] border ${buildProgress >= 1 ? 'bg-[var(--success-soft)] text-[var(--success)] border-[var(--success)]' : 'bg-[var(--surface-sunken)] text-[var(--text-secondary)] border-[var(--border)]'}`}>
                 <span>Understanding learner profile</span>
-                {buildProgress >= 1 ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <Loader2 className="w-4 h-4 animate-spin" />}
+                {buildProgress >= 1 ? <CheckCircle2 className="w-4 h-4 text-[var(--success)]" /> : <Loader2 className="w-4 h-4 animate-spin" />}
               </div>
-              <div className={`flex items-center justify-between p-3 rounded-md border ${buildProgress >= 2 ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
+              <div className={`flex items-center justify-between p-3 rounded-[var(--radius-sm)] border ${buildProgress >= 2 ? 'bg-[var(--success-soft)] text-[var(--success)] border-[var(--success)]' : 'bg-[var(--surface-sunken)] text-[var(--text-secondary)] border-[var(--border)]'}`}>
                 <span>Mapping target career & skill requirements</span>
-                {buildProgress >= 2 ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <Loader2 className="w-4 h-4 animate-spin" />}
+                {buildProgress >= 2 ? <CheckCircle2 className="w-4 h-4 text-[var(--success)]" /> : <Loader2 className="w-4 h-4 animate-spin" />}
               </div>
-              <div className={`flex items-center justify-between p-3 rounded-lg border ${buildProgress >= 3 ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
+              <div className={`flex items-center justify-between p-3 rounded-[var(--radius-sm)] border ${buildProgress >= 3 ? 'bg-[var(--success-soft)] text-[var(--success)] border-[var(--success)]' : 'bg-[var(--surface-sunken)] text-[var(--text-secondary)] border-[var(--border)]'}`}>
                 <span>Identifying skill gaps & prerequisite graph</span>
-                {buildProgress >= 3 ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <Loader2 className="w-4 h-4 animate-spin" />}
+                {buildProgress >= 3 ? <CheckCircle2 className="w-4 h-4 text-[var(--success)]" /> : <Loader2 className="w-4 h-4 animate-spin" />}
               </div>
-              <div className={`flex items-center justify-between p-3 rounded-md border ${buildProgress >= 4 ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
+              <div className={`flex items-center justify-between p-3 rounded-[var(--radius-sm)] border ${buildProgress >= 4 ? 'bg-[var(--success-soft)] text-[var(--success)] border-[var(--success)]' : 'bg-[var(--surface-sunken)] text-[var(--text-secondary)] border-[var(--border)]'}`}>
                 <span>Topological ordering & resource selection</span>
-                {buildProgress >= 4 ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <Loader2 className="w-4 h-4 animate-spin" />}
+                {buildProgress >= 4 ? <CheckCircle2 className="w-4 h-4 text-[var(--success)]" /> : <Loader2 className="w-4 h-4 animate-spin" />}
               </div>
-              <div className={`flex items-center justify-between p-3 rounded-md border ${buildProgress >= 5 ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
+              <div className={`flex items-center justify-between p-3 rounded-[var(--radius-sm)] border ${buildProgress >= 5 ? 'bg-[var(--success-soft)] text-[var(--success)] border-[var(--success)]' : 'bg-[var(--surface-sunken)] text-[var(--text-secondary)] border-[var(--border)]'}`}>
                 <span>Path ready! Redirecting to workspace...</span>
-                {buildProgress >= 5 ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <Loader2 className="w-4 h-4 animate-spin" />}
+                {buildProgress >= 5 ? <CheckCircle2 className="w-4 h-4 text-[var(--success)]" /> : <Loader2 className="w-4 h-4 animate-spin" />}
               </div>
             </div>
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 };

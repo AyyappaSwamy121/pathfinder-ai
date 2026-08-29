@@ -1,123 +1,117 @@
 import React from 'react';
-import { Cpu, ShieldCheck, CheckCircle2, GitGraph, Award, ArrowRight, Code } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
+import { Card } from '../components/ui/Card';
+import { Badge } from '../components/ui/Badge';
 
 export const ArchitecturePage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-surface border border-slate-200 rounded-lg p-6 shadow-subtle flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <Card className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="text-[10px] font-extrabold text-primary uppercase tracking-widest mb-1">
-            ENGINEERING TRANSPARENCY & LOGIC MAP
+          <div className="mb-1">
+            <Badge tone="brand">ENGINEERING TRANSPARENCY</Badge>
           </div>
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+          <h2 className="text-xl font-bold text-[var(--text-primary)]">
             How PathFinder AI Thinks
           </h2>
-          <p className="text-xs text-slate-600 mt-1">
+          <p className="text-xs text-[var(--text-secondary)] mt-1">
             Explicit boundary separating AI natural-language reasoning from deterministic recommendation logic
           </p>
         </div>
 
-        <div className="flex items-center space-x-2">
-          <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1 rounded border border-emerald-200 flex items-center">
-            <ShieldCheck className="w-3.5 h-3.5 mr-1" />
-            100% Deterministic Guarantee
-          </span>
-        </div>
-      </div>
+        <Badge tone="success">
+          <ShieldCheck className="w-3.5 h-3.5 mr-1" />
+          100% Deterministic Guarantee
+        </Badge>
+      </Card>
 
       {/* System Pipeline Breakdown */}
-      <div className="bg-surface border border-slate-200 rounded-lg p-6 shadow-subtle space-y-6">
-        <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3">
+      <Card className="space-y-6">
+        <h3 className="text-sm font-bold text-[var(--text-primary)] border-b border-[var(--border)] pb-3">
           7-Stage Intelligence Pipeline Breakdown
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-          {/* Stage 1 */}
-          <div className="border border-slate-200 rounded-md p-4 bg-slate-50">
+          <div className="border border-[var(--border)] rounded-[var(--radius-sm)] p-4 bg-[var(--surface-sunken)]">
             <div className="flex items-center justify-between mb-2">
-              <span className="font-bold text-slate-900">STAGE 1: NLP PROFILE PARSER</span>
-              <span className="bg-indigo-100 text-primary text-[10px] font-bold px-2 py-0.5 rounded">LLM Engine</span>
+              <span className="font-bold text-[var(--text-primary)]">STAGE 1: NLP PROFILE PARSER</span>
+              <Badge tone="brand">LLM Engine</Badge>
             </div>
-            <p className="text-slate-600 leading-relaxed mb-2">
+            <p className="text-[var(--text-secondary)] leading-relaxed mb-2">
               Parses conversational text into structured Pydantic schemas (target role, skills, weekly hours, timeline).
             </p>
-            <div className="text-[10px] font-mono text-slate-500">
+            <div className="text-[10px] font-mono text-[var(--text-tertiary)]">
               Input: Conversational text ──► Output: Structured JSON
             </div>
           </div>
 
-          {/* Stage 2 */}
-          <div className="border border-slate-200 rounded-md p-4 bg-slate-50">
+          <div className="border border-[var(--border)] rounded-[var(--radius-sm)] p-4 bg-[var(--surface-sunken)]">
             <div className="flex items-center justify-between mb-2">
-              <span className="font-bold text-slate-900">STAGE 2: LEARNER MODEL STATE</span>
-              <span className="bg-slate-200 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded">Deterministic DB</span>
+              <span className="font-bold text-[var(--text-primary)]">STAGE 2: LEARNER MODEL STATE</span>
+              <Badge tone="neutral">Deterministic DB</Badge>
             </div>
-            <p className="text-slate-600 leading-relaxed mb-2">
+            <p className="text-[var(--text-secondary)] leading-relaxed mb-2">
               Maintains live persistent state for proficiency, confidence, and portfolio evidence for every skill.
             </p>
-            <div className="text-[10px] font-mono text-slate-500">
+            <div className="text-[10px] font-mono text-[var(--text-tertiary)]">
               State: Mastered / Developing / Missing / Locked
             </div>
           </div>
 
-          {/* Stage 3 */}
-          <div className="border border-slate-200 rounded-md p-4 bg-slate-50">
+          <div className="border border-[var(--border)] rounded-[var(--radius-sm)] p-4 bg-[var(--surface-sunken)]">
             <div className="flex items-center justify-between mb-2">
-              <span className="font-bold text-slate-900">STAGE 3: SKILL GAP & READINESS ENGINE</span>
-              <span className="bg-slate-200 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded">Deterministic Math</span>
+              <span className="font-bold text-[var(--text-primary)]">STAGE 3: SKILL GAP & READINESS</span>
+              <Badge tone="neutral">Deterministic Math</Badge>
             </div>
-            <p className="text-slate-600 leading-relaxed mb-2">
+            <p className="text-[var(--text-secondary)] leading-relaxed mb-2">
               Computes readiness formula: (0.5 * Mastered + 0.3 * Developing + 0.2 * Prerequisite Ratio) * 100.
             </p>
-            <div className="text-[10px] font-mono text-slate-500">
+            <div className="text-[10px] font-mono text-[var(--text-tertiary)]">
               Formula: Mathematical weighted sum
             </div>
           </div>
 
-          {/* Stage 4 */}
-          <div className="border border-slate-200 rounded-md p-4 bg-slate-50">
+          <div className="border border-[var(--border)] rounded-[var(--radius-sm)] p-4 bg-[var(--surface-sunken)]">
             <div className="flex items-center justify-between mb-2">
-              <span className="font-bold text-slate-900">STAGE 4: PREREQUISITE GRAPH TOPOLOGY</span>
-              <span className="bg-slate-200 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded">DAG Graph Alg</span>
+              <span className="font-bold text-[var(--text-primary)]">STAGE 4: PREREQUISITE GRAPH TOPOLOGY</span>
+              <Badge tone="neutral">DAG Graph Alg</Badge>
             </div>
-            <p className="text-slate-600 leading-relaxed mb-2">
+            <p className="text-[var(--text-secondary)] leading-relaxed mb-2">
               Performs topological sorting on 40+ skills to guarantee prerequisites are satisfied before advanced steps.
             </p>
-            <div className="text-[10px] font-mono text-slate-500">
+            <div className="text-[10px] font-mono text-[var(--text-tertiary)]">
               Algorithm: Kahn's DAG Topological Ordering
             </div>
           </div>
 
-          {/* Stage 5 */}
-          <div className="border border-slate-200 rounded-md p-4 bg-slate-50">
+          <div className="border border-[var(--border)] rounded-[var(--radius-sm)] p-4 bg-[var(--surface-sunken)]">
             <div className="flex items-center justify-between mb-2">
-              <span className="font-bold text-slate-900">STAGE 5: HYBRID RECOMMENDATION RANKING</span>
-              <span className="bg-slate-200 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded">Multi-factor Alg</span>
+              <span className="font-bold text-[var(--text-primary)]">STAGE 5: HYBRID RECOMMENDATION RANKING</span>
+              <Badge tone="neutral">Multi-factor Alg</Badge>
             </div>
-            <p className="text-slate-600 leading-relaxed mb-2">
+            <p className="text-[var(--text-secondary)] leading-relaxed mb-2">
               Ranks activities based on 7 factors (30% Gap, 20% Career, 15% Prereqs, 10% Difficulty, 10% Time, 5% Feedback).
             </p>
-            <div className="text-[10px] font-mono text-slate-500">
+            <div className="text-[10px] font-mono text-[var(--text-tertiary)]">
               Output: Next Best Action Spotlight
             </div>
           </div>
 
-          {/* Stage 6 */}
-          <div className="border border-slate-200 rounded-md p-4 bg-slate-50">
+          <div className="border border-[var(--border)] rounded-[var(--radius-sm)] p-4 bg-[var(--surface-sunken)]">
             <div className="flex items-center justify-between mb-2">
-              <span className="font-bold text-slate-900">STAGE 6: ADAPTIVE FEEDBACK LOOP</span>
-              <span className="bg-slate-200 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded">Adaptive Replanning</span>
+              <span className="font-bold text-[var(--text-primary)]">STAGE 6: ADAPTIVE FEEDBACK LOOP</span>
+              <Badge tone="neutral">Adaptive Replanning</Badge>
             </div>
-            <p className="text-slate-600 leading-relaxed mb-2">
+            <p className="text-[var(--text-secondary)] leading-relaxed mb-2">
               Micro-assessments & 5-tier confidence feedback automatically re-evaluate gaps and re-sort roadmap topologically.
             </p>
-            <div className="text-[10px] font-mono text-slate-500">
+            <div className="text-[10px] font-mono text-[var(--text-tertiary)]">
               Trigger: Quiz score or confidence rating
             </div>
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

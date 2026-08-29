@@ -1,7 +1,9 @@
 import React from 'react';
 import { useLearner } from '../context/LearnerContext';
-import { Sparkles, UserCheck, PlayCircle, Eye } from 'lucide-react';
+import { Sparkles, UserCheck, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Button } from './ui/Button';
+import { Badge } from './ui/Badge';
 
 export const JudgeDemoBanner: React.FC = () => {
   const { judgeMode, loadPresetProfile } = useLearner();
@@ -9,45 +11,35 @@ export const JudgeDemoBanner: React.FC = () => {
   if (!judgeMode) return null;
 
   return (
-    <div className="bg-gradient-to-r from-amber-500/10 via-indigo-500/10 to-emerald-500/10 border-b border-amber-200/60 py-2.5 px-4 text-xs">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
-        <div className="flex items-center space-x-2 text-amber-900 font-medium">
-          <Sparkles className="w-4 h-4 text-amber-600 animate-spin" style={{ animationDuration: '4s' }} />
-          <span className="font-bold">HCL JUDGE DEMO MODE:</span>
-          <span>Quick test pre-seeded profiles to test adaptive replenishment and prerequisite ordering:</span>
+    <div className="bg-[var(--surface-sunken)] border-b border-[var(--border)] py-2 px-6 text-xs">
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-[var(--text-secondary)] font-medium">
+          <Badge tone="warning">
+            <Sparkles className="w-3 h-3 mr-1" />
+            HCL DEMO WORKSPACE
+          </Badge>
+          <span>Select preset test profile:</span>
         </div>
 
-        <div className="flex items-center space-x-2 overflow-x-auto">
-          <button
-            onClick={() => loadPresetProfile('alex')}
-            className="flex items-center space-x-1 px-2.5 py-1 bg-white hover:bg-amber-50 text-amber-900 border border-amber-200 rounded font-medium shadow-2xs transition-colors"
-          >
-            <UserCheck className="w-3 h-3 text-amber-600" />
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="secondary" onClick={() => loadPresetProfile('alex')}>
+            <UserCheck className="w-3 h-3 text-[var(--brand)]" />
             <span>Alex (AI Engineer)</span>
-          </button>
+          </Button>
 
-          <button
-            onClick={() => loadPresetProfile('jordan')}
-            className="flex items-center space-x-1 px-2.5 py-1 bg-white hover:bg-indigo-50 text-indigo-900 border border-indigo-200 rounded font-medium shadow-2xs transition-colors"
-          >
-            <UserCheck className="w-3 h-3 text-indigo-600" />
+          <Button size="sm" variant="secondary" onClick={() => loadPresetProfile('jordan')}>
             <span>Jordan (Data Analyst)</span>
-          </button>
+          </Button>
 
-          <button
-            onClick={() => loadPresetProfile('devon')}
-            className="flex items-center space-x-1 px-2.5 py-1 bg-white hover:bg-emerald-50 text-emerald-900 border border-emerald-200 rounded font-medium shadow-2xs transition-colors"
-          >
-            <UserCheck className="w-3 h-3 text-emerald-600" />
+          <Button size="sm" variant="secondary" onClick={() => loadPresetProfile('devon')}>
             <span>Devon (Full Stack)</span>
-          </button>
+          </Button>
 
-          <Link
-            to="/architecture"
-            className="flex items-center space-x-1 px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded font-medium shadow-2xs transition-colors"
-          >
-            <Eye className="w-3 h-3" />
-            <span>How AI Thinks</span>
+          <Link to="/architecture">
+            <Button size="sm" variant="ghost">
+              <Eye className="w-3 h-3" />
+              <span>How AI Thinks</span>
+            </Button>
           </Link>
         </div>
       </div>
