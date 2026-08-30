@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { NavLink, useLocation, Link } from 'react-router-dom';
+import { NavLink, useLocation, Link, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, MapPin, GitGraph, Briefcase, Award, Sliders, MessageSquareCode, Cpu, Menu, X, ShieldCheck, UserCheck, ChevronDown
+  LayoutDashboard, MapPin, GitGraph, Briefcase, Award, Sliders, MessageSquareCode, Cpu, Menu, X, ShieldCheck, UserCheck, ChevronDown, LogOut, Settings, User
 } from 'lucide-react';
 import { useLearner } from '../../context/LearnerContext';
 import { Button } from '../ui/Button';
@@ -12,7 +12,8 @@ interface AppShellProps {
 
 export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   const location = useLocation();
-  const { dashboard, loadPresetProfile } = useLearner();
+  const navigate = useNavigate();
+  const { user, dashboard, loadPresetProfile, logout } = useLearner();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -39,7 +40,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
       case '/skills':
         return 'Skill Knowledge Graph';
       case '/careers':
-        return 'Career Base';
+        return 'Careers';
       case '/assessment':
         return 'Assessments';
       case '/simulator':
@@ -53,6 +54,11 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
       default:
         return 'Overview';
     }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
   };
 
   return (
@@ -82,7 +88,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
                 PATHFINDER
               </span>
               <span className="text-[10px] text-[var(--text-tertiary)] font-medium leading-none block mt-0.5">
-                Career Intelligence
+                Career Intelligence Platform
               </span>
             </div>
           </Link>
@@ -152,16 +158,39 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
           </div>
         </div>
 
-        {/* Sidebar Workspace Status Footer */}
-        <div className="p-3 border-t border-[var(--border)] bg-[var(--surface-sunken)]">
-          <div className="text-xs font-semibold text-[var(--text-primary)] truncate">
-            {dashboard?.target_career?.title || 'AI Engineer'}
-          </div>
-          <div className="text-[11px] text-[var(--text-secondary)] flex items-center justify-between mt-1">
-            <span>Readiness</span>
-            <span className="font-mono font-bold text-[var(--brand)]">
+        {/* Sidebar Workspace Status & User Footer */}
+        <div className="p-3 border-t border-[var(--border)] bg-[var(--surface-sunken)] space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="text-xs font-semibold text-[var(--text-primary)] truncate">
+              {dashboard?.target_career?.title || 'AI Engineer'}
+            </div>
+            <span className="font-mono text-xs font-bold text-[var(--brand)]">
               {Math.round(dashboard?.readiness_score || 64)}%
             </span>
+          </div>
+
+          <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs">
+            <div className="flex items-center space-x-2 truncate">
+              <div className="w-6 h-6 rounded-full bg-primary-soft text-primary font-bold text-[10px] flex items-center justify-center shrink-0">
+                {user?.first_name?.[0] || 'A'}
+              </div>
+              <div className="truncate">
+                <div className="font-semibold text-slate-900 leading-tight truncate">
+                  {user?.first_name || 'Alex'} {user?.last_name || ''}
+                </div>
+                <div className="text-[10px] text-slate-500 truncate">
+                  {user?.college_name || 'HCL Amplify'}
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={handleLogout}
+              title="Sign Out"
+              className="text-slate-400 hover:text-slate-700 p-1 rounded hover:bg-slate-200/50"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       </aside>
@@ -195,7 +224,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
                 className="flex items-center gap-2 px-3 py-1.5 rounded-[var(--radius-sm)] text-xs font-medium bg-[var(--surface-sunken)] text-[var(--text-primary)] border border-[var(--border)] hover:bg-[var(--border)] transition-colors"
               >
                 <ShieldCheck className="w-3.5 h-3.5 text-[var(--brand)]" />
-                <span className="text-[var(--text-secondary)]">Demo:</span>
+                <span className="text-[var(--text-secondary)]">Demo Persona:</span>
                 <span className="font-semibold">
                   {dashboard?.target_career?.title === 'Data Analyst'
                     ? 'Jordan (Data Analyst)'
@@ -245,7 +274,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
           </div>
         </header>
 
-        {/* Main Content View (max-w-6xl mx-auto px-8 py-8) */}
+        {/* Main Content View */}
         <main className="flex-1 max-w-6xl w-full mx-auto px-8 py-8">
           {children}
         </main>

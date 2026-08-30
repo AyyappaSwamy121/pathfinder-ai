@@ -6,14 +6,17 @@ from backend.models.domain import LearnerProfile, Career, LearningPath, PathStep
 from backend.services.skill_gap_engine import SkillGapEngine
 from backend.services.recommendation_engine import HybridRecommendationEngine
 from backend.services.roadmap_engine import RoadmapEngine
-from backend.seed.seed_data import DEMO_PROFILE_ID
+from backend.api.auth_router import get_current_profile_id
 
 router = APIRouter(prefix="/api/dashboard", tags=["Dashboard"])
 
 @router.get("", response_model=DashboardResponse)
-def get_dashboard(db: Session = Depends(get_db)):
-    """Fetch complete learner dashboard data including readiness, next best action, gaps, and roadmap stats."""
-    profile = db.query(LearnerProfile).filter(LearnerProfile.id == DEMO_PROFILE_ID).first()
+def get_dashboard(
+    db: Session = Depends(get_db),
+    profile_id: str = Depends(get_current_profile_id)
+):
+    """Fetch complete learner dashboard data for the active user session."""
+    profile = db.query(LearnerProfile).filter(LearnerProfile.id == profile_id).first()
     if not profile:
         raise HTTPException(status_code=404, detail="Learner profile not found")
 
@@ -22,19 +25,19 @@ def get_dashboard(db: Session = Depends(get_db)):
         career = db.query(Career).filter(Career.id == "c_ai_engineer").first()
 
     # Gap Analysis
-    gaps = SkillGapEngine.analyze_gaps(db, DEMO_PROFILE_ID)
+    gaps = SkillGapEngine.analyze_gaps(db, profile_id)
 
     # Next Best Action
-    next_action = HybridRecommendationEngine.get_next_best_action(db, DEMO_PROFILE_ID)
+    next_action = HybridRecommendationEngine.get_next_best_action(db, profile_id)
 
     # Roadmap Progress
     path = db.query(LearningPath).filter(
-        LearningPath.profile_id == DEMO_PROFILE_ID,
+        LearningPath.profile_id == profile_id,
         LearningPath.is_active == True
     ).first()
 
     if not path:
-        path = RoadmapEngine.generate_roadmap(db, DEMO_PROFILE_ID)
+        path = RoadmapEngine.generate_roadmap(db, profile_id)
 
     completed_cnt = db.query(PathStep).filter(PathStep.path_id == path.id, PathStep.status == "COMPLETED").count()
     total_cnt = db.query(PathStep).filter(PathStep.path_id == path.id).count()

@@ -12,6 +12,28 @@ def run_all_backend_tests():
     assert res.status_code == 200, f"Health check failed: {res.text}"
     print("[PASS] Health Check Passed:", res.json()["service"])
 
+    # 1b. User Signup & Login Verification
+    import uuid
+    test_email = f"student_{uuid.uuid4().hex[:6]}@college.edu"
+    res = client.post("/api/auth/signup", json={
+        "first_name": "Test",
+        "last_name": "Student",
+        "college_name": "MIT",
+        "email": test_email,
+        "password": "securepassword123"
+    })
+    assert res.status_code == 200, f"Signup failed: {res.text}"
+    auth_data = res.json()
+    assert "token" in auth_data
+    print("[PASS] Auth Signup Endpoint Passed | Token generated for:", auth_data["email"])
+
+    res = client.post("/api/auth/login", json={
+        "email": test_email,
+        "password": "securepassword123"
+    })
+    assert res.status_code == 200, f"Login failed: {res.text}"
+    print("[PASS] Auth Login Endpoint Passed | Authenticated user:", auth_data["first_name"])
+
     # 2. Layer 1 NLP Profile Extraction
     res = client.post("/api/profile/analyze", json={
         "natural_language_input": "I'm a CSE student with Python and SQL experience. I want to become an AI Engineer within 6 months."

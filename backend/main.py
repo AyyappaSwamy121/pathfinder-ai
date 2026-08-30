@@ -7,6 +7,7 @@ from backend.config import settings
 from backend.database.session import engine, Base, SessionLocal
 from backend.seed.seed_loader import init_seed_database
 
+from backend.api.auth_router import router as auth_router
 from backend.api.profile_router import router as profile_router
 from backend.api.career_router import router as career_router
 from backend.api.roadmap_router import router as roadmap_router
@@ -19,7 +20,20 @@ from backend.api.dashboard_router import router as dashboard_router
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("pathfinder.main")
 
-# Initialize Database Schema Tables
+# Initialize Database Schema Tables & Auto-migrate missing columns
+from sqlalchemy import text
+with engine.connect() as conn:
+    try:
+        conn.execute(text("ALTER TABLE users ADD COLUMN college_name VARCHAR;"))
+        conn.commit()
+    except Exception:
+        pass
+    try:
+        conn.execute(text("ALTER TABLE users ADD COLUMN hashed_password VARCHAR;"))
+        conn.commit()
+    except Exception:
+        pass
+
 Base.metadata.create_all(bind=engine)
 
 # Seed Database
@@ -45,6 +59,7 @@ app.add_middleware(
 )
 
 # Include Routers
+app.include_router(auth_router)
 app.include_router(profile_router)
 app.include_router(career_router)
 app.include_router(roadmap_router)
@@ -53,9 +68,16 @@ app.include_router(assessment_router)
 app.include_router(chat_router)
 app.include_router(dashboard_router)
 
+from fastapi.exceptions import HTTPException
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """Rule 5: No raw stack traces to users. Catch unhandled errors cleanly."""
+    if isinstance(exc, HTTPException):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": exc.detail}
+        )
     logger.error(f"Global unhandled error: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,

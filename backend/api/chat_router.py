@@ -3,12 +3,16 @@ from sqlalchemy.orm import Session
 from backend.database.session import get_db
 from backend.schemas.pydantic_models import ChatRequest, ChatResponse
 from backend.services.copilot_engine import CopilotEngine
-from backend.seed.seed_data import DEMO_PROFILE_ID
+from backend.api.auth_router import get_current_profile_id
 
 router = APIRouter(prefix="/api/chat", tags=["AI Copilot"])
 
 @router.post("", response_model=ChatResponse)
-def copilot_chat(req: ChatRequest, db: Session = Depends(get_db)):
+def copilot_chat(
+    req: ChatRequest,
+    db: Session = Depends(get_db),
+    profile_id: str = Depends(get_current_profile_id)
+):
     """Grounded AI Copilot conversation endpoint."""
-    res = CopilotEngine.answer_query(db, DEMO_PROFILE_ID, req.message)
+    res = CopilotEngine.answer_query(db, profile_id, req.message)
     return res

@@ -7,7 +7,7 @@ from backend.schemas.pydantic_models import (
 )
 from backend.models.domain import Assessment, Skill
 from backend.services.adaptive_engine import AdaptiveLearningEngine
-from backend.seed.seed_data import DEMO_PROFILE_ID
+from backend.api.auth_router import get_current_profile_id
 
 router = APIRouter(tags=["Assessments & Feedback"])
 
@@ -16,7 +16,6 @@ def get_assessment(assessment_id: str, db: Session = Depends(get_db)):
     """Fetch assessment detail with multiple choice questions."""
     asm = db.query(Assessment).filter(Assessment.id == assessment_id).first()
     if not asm:
-        # Fallback to first available assessment if not found
         asm = db.query(Assessment).first()
         if not asm:
             raise HTTPException(status_code=404, detail="No assessment found")
@@ -41,17 +40,25 @@ def get_assessment(assessment_id: str, db: Session = Depends(get_db)):
     )
 
 @router.post("/api/assessment/evaluate", response_model=AssessmentEvaluateResponse)
-def evaluate_assessment(req: AssessmentEvaluateRequest, db: Session = Depends(get_db)):
+def evaluate_assessment(
+    req: AssessmentEvaluateRequest,
+    db: Session = Depends(get_db),
+    profile_id: str = Depends(get_current_profile_id)
+):
     """Submit assessment answers and receive score, feedback, and adaptive roadmap updates."""
     res = AdaptiveLearningEngine.process_assessment_result(
-        db, DEMO_PROFILE_ID, req.assessment_id, req.answers
+        db, profile_id, req.assessment_id, req.answers
     )
     return res
 
 @router.post("/api/feedback", response_model=FeedbackSubmitResponse)
-def submit_feedback(req: FeedbackSubmitRequest, db: Session = Depends(get_db)):
+def submit_feedback(
+    req: FeedbackSubmitRequest,
+    db: Session = Depends(get_db),
+    profile_id: str = Depends(get_current_profile_id)
+):
     """Submit 5-tier confidence feedback (Struggling, Need Practice, Comfortable, Confident, Too Easy)."""
     res = AdaptiveLearningEngine.process_feedback(
-        db, DEMO_PROFILE_ID, req.skill_id, req.sentiment, req.comment
+        db, profile_id, req.skill_id, req.sentiment, req.comment
     )
     return res

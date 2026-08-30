@@ -13,24 +13,74 @@ import {
 
 const API_BASE = '/api';
 
+export interface AuthResponseData {
+  token: str;
+  user_id: str;
+  email: str;
+  first_name: str;
+  last_name: str;
+  college_name: str;
+  profile_id: str;
+}
+
+type str = string;
+
 async function fetchJSON<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const token = localStorage.getItem('pathfinder_token');
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options?.headers as Record<string, string>),
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const res = await fetch(`${API_BASE}${endpoint}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
     ...options,
+    headers,
   });
 
   if (!res.ok) {
     const errorText = await res.text();
-    throw new Error(`API error (${res.status}): ${errorText}`);
+    let parsedMsg = errorText;
+    try {
+      const errObj = JSON.parse(errorText);
+      parsedMsg = errObj.detail || errObj.message || errorText;
+    } catch (_) {}
+    throw new Error(parsedMsg);
   }
 
   return res.json();
 }
 
 export const api = {
+  // Authentication API
+  signup: (data: {
+    first_name: string;
+    last_name: string;
+    college_name: string;
+    email: string;
+    password: string;
+  }) =>
+    fetchJSON<AuthResponseData>('/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  login: (data: { email: string; password: string }) =>
+    fetchJSON<AuthResponseData>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  getMe: () => fetchJSON<AuthResponseData>('/auth/me'),
+
+  logout: () =>
+    fetchJSON<{ message: string }>('/auth/logout', {
+      method: 'POST',
+    }),
+
   // Onboarding & Profile
   analyzeProfile: (text: string) =>
     fetchJSON<ProfileExtractResponse>('/profile/analyze', {

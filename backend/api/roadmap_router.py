@@ -4,21 +4,24 @@ from backend.database.session import get_db
 from backend.schemas.pydantic_models import LearningPathSchema, PathStepSchema, ResourceSchema, ProjectSchema
 from backend.models.domain import LearningPath, PathStep, Skill, Career, Resource, Project, Assessment
 from backend.services.roadmap_engine import RoadmapEngine
-from backend.seed.seed_data import DEMO_PROFILE_ID
+from backend.api.auth_router import get_current_profile_id
 
 router = APIRouter(prefix="/api/paths", tags=["Roadmap"])
 
 @router.get("/current", response_model=LearningPathSchema)
-def get_current_path(db: Session = Depends(get_db)):
-    """Fetch current active learning roadmap path for demo user."""
+def get_current_path(
+    db: Session = Depends(get_db),
+    profile_id: str = Depends(get_current_profile_id)
+):
+    """Fetch current active learning roadmap path for active user."""
     path = db.query(LearningPath).filter(
-        LearningPath.profile_id == DEMO_PROFILE_ID,
+        LearningPath.profile_id == profile_id,
         LearningPath.is_active == True
     ).first()
 
     if not path:
         # Generate default path
-        path = RoadmapEngine.generate_roadmap(db, DEMO_PROFILE_ID)
+        path = RoadmapEngine.generate_roadmap(db, profile_id)
 
     career = db.query(Career).filter(Career.id == path.career_id).first()
     steps_query = db.query(PathStep).filter(PathStep.path_id == path.id).order_by(PathStep.step_order).all()
@@ -65,7 +68,10 @@ def get_current_path(db: Session = Depends(get_db)):
     )
 
 @router.post("/generate", response_model=LearningPathSchema)
-def generate_path(db: Session = Depends(get_db)):
+def generate_path(
+    db: Session = Depends(get_db),
+    profile_id: str = Depends(get_current_profile_id)
+):
     """Regenerate learning path topologically."""
-    path = RoadmapEngine.generate_roadmap(db, DEMO_PROFILE_ID)
-    return get_current_path(db)
+    path = RoadmapEngine.generate_roadmap(db, profile_id)
+    return get_current_path(db, profile_id)

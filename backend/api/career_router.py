@@ -8,7 +8,7 @@ from backend.schemas.pydantic_models import (
 )
 from backend.models.domain import Career, CareerSkill, Skill
 from backend.services.simulator_engine import SimulatorEngine
-from backend.seed.seed_data import DEMO_PROFILE_ID
+from backend.api.auth_router import get_current_profile_id
 
 router = APIRouter(prefix="/api/careers", tags=["Careers"])
 
@@ -62,21 +62,29 @@ def get_career_detail(career_id: str, db: Session = Depends(get_db)):
     )
 
 @router.post("/simulate", response_model=SimulateCareerResponse)
-def simulate_career(req: SimulateCareerRequest, db: Session = Depends(get_db)):
+def simulate_career(
+    req: SimulateCareerRequest,
+    db: Session = Depends(get_db),
+    profile_id: str = Depends(get_current_profile_id)
+):
     """What-if Career Simulator endpoint."""
-    res = SimulatorEngine.simulate_career_transition(db, DEMO_PROFILE_ID, req.target_career_id)
+    res = SimulatorEngine.simulate_career_transition(db, profile_id, req.target_career_id)
     return res
 
 @router.post("/compare", response_model=CareerComparisonResponse)
-def compare_careers(req: CareerComparisonRequest, db: Session = Depends(get_db)):
+def compare_careers(
+    req: CareerComparisonRequest,
+    db: Session = Depends(get_db),
+    profile_id: str = Depends(get_current_profile_id)
+):
     """Compare two career targets side by side."""
     ca = db.query(Career).filter(Career.id == req.career_id_a).first()
     cb = db.query(Career).filter(Career.id == req.career_id_b).first()
     if not ca or not cb:
         raise HTTPException(status_code=404, detail="One or both careers not found")
 
-    res_a = SimulatorEngine.simulate_career_transition(db, DEMO_PROFILE_ID, req.career_id_a)
-    res_b = SimulatorEngine.simulate_career_transition(db, DEMO_PROFILE_ID, req.career_id_b)
+    res_a = SimulatorEngine.simulate_career_transition(db, profile_id, req.career_id_a)
+    res_b = SimulatorEngine.simulate_career_transition(db, profile_id, req.career_id_b)
 
     shared = list(set(res_a["shared_skills"]).intersection(set(res_b["shared_skills"])))
 
