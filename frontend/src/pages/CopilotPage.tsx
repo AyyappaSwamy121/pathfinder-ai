@@ -13,10 +13,13 @@ interface ChatMessage {
 
 export const CopilotPage: React.FC = () => {
   const { dashboard } = useLearner();
+  const targetTitle = dashboard?.target_career?.title || 'AI Engineer';
+  const readiness = Math.round(dashboard?.readiness_score || 64);
+
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       sender: 'ai',
-      text: `Hello Alex! I'm grounded in your live profile for ${dashboard?.target_career.title || 'AI Engineer'} (${Math.round(dashboard?.readiness_score || 64)}% readiness). How can I assist your career path today?`,
+      text: `Hello! I'm grounded in your live profile for ${targetTitle} (${readiness}% readiness). How can I assist your career path today?`,
     },
   ]);
   const [input, setInput] = useState('');
@@ -39,7 +42,7 @@ export const CopilotPage: React.FC = () => {
 
     try {
       const res = await api.sendChatMessage(textToSend);
-      setMessages((prev) => [...prev, { sender: 'ai', text: res.reply }]);
+      setMessages((prev) => [...prev, { sender: 'ai', text: res.reply || 'Analysis complete.' }]);
     } catch (err) {
       setMessages((prev) => [
         ...prev,
@@ -69,11 +72,11 @@ export const CopilotPage: React.FC = () => {
         <div className="bg-[var(--surface-sunken)] border border-[var(--border)] rounded-[var(--radius-sm)] p-3 text-xs flex items-center gap-3">
           <div>
             <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase">Context</div>
-            <div className="font-bold text-[var(--text-primary)]">{dashboard?.target_career.title}</div>
+            <div className="font-bold text-[var(--text-primary)]">{targetTitle}</div>
           </div>
           <div className="border-l border-[var(--border)] pl-3">
             <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase">Readiness</div>
-            <div className="font-mono font-bold text-[var(--brand)]">{Math.round(dashboard?.readiness_score || 64)}%</div>
+            <div className="font-mono font-bold text-[var(--brand)]">{readiness}%</div>
           </div>
         </div>
       </Card>

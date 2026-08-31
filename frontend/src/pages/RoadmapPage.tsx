@@ -167,10 +167,10 @@ export const RoadmapPage: React.FC = () => {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                               <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-2">
-                                Recommended Resources ({step.resources.length})
+                                Recommended Resources ({(step.resources || []).length})
                               </div>
                               <div className="space-y-2">
-                                {step.resources.map((res) => (
+                                {(step.resources || []).map((res) => (
                                   <div key={res.id} className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius-sm)] p-3 flex items-start justify-between">
                                     <div>
                                       <div className="font-semibold text-[var(--text-primary)]">{res.title}</div>

@@ -21,7 +21,7 @@ def get_dashboard(
     """Fetch complete learner dashboard data for the active user session."""
     profile = db.query(LearnerProfile).filter(LearnerProfile.id == profile_id).first()
     if not profile:
-        profile = LearnerProfile(id=profile_id, user_id=user.id if user else DEMO_PROFILE_ID)
+        profile = LearnerProfile(id=profile_id, user_id="usr_alex_demo", target_career_id="c_ai_engineer", readiness_score=15.0)
         db.add(profile)
         db.commit()
 

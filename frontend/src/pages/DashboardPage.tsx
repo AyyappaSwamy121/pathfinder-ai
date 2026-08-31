@@ -8,7 +8,7 @@ import { WhyThisModal } from '../components/WhyThisModal';
 import { AssessmentModal } from '../components/AssessmentModal';
 import { FeedbackModal } from '../components/FeedbackModal';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronRight, Sparkles } from 'lucide-react';
+import { ArrowRight, ChevronRight } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
@@ -38,12 +38,18 @@ export const DashboardPage: React.FC = () => {
     );
   }
 
+  const targetTitle = dashboard.target_career?.title || 'AI Engineer';
+  const readinessScore = Math.round(dashboard.readiness_score || 0);
+  const masteredSkills = dashboard.skill_gaps?.mastered || [];
+  const developingSkills = dashboard.skill_gaps?.developing || [];
+  const missingSkills = dashboard.skill_gaps?.missing || [];
+
   // Growth Analytics Data
   const growthData = [
     { week: 'Week 1', score: 20, mastered: 2 },
     { week: 'Week 2', score: 32, mastered: 4 },
     { week: 'Week 3', score: 48, mastered: 6 },
-    { week: 'Week 4', score: 64, mastered: 8 },
+    { week: 'Week 4', score: readinessScore || 64, mastered: 8 },
   ];
 
   return (
@@ -55,11 +61,11 @@ export const DashboardPage: React.FC = () => {
             Welcome back, {firstName}
           </h2>
           <div className="flex items-center gap-2 mt-1 text-xs text-[var(--text-secondary)]">
-            <span className="font-semibold text-[var(--text-primary)]">{dashboard.target_career.title} Path</span>
+            <span className="font-semibold text-[var(--text-primary)]">{targetTitle} Path</span>
             <span>·</span>
-            <span className="font-mono text-[var(--brand)] font-bold">{Math.round(dashboard.readiness_score)}% Readiness</span>
+            <span className="font-mono text-[var(--brand)] font-bold">{readinessScore}% Readiness</span>
             <span>·</span>
-            <span>{dashboard.milestones_completed} of {dashboard.milestones_total} milestones completed</span>
+            <span>{dashboard.milestones_completed || 0} of {dashboard.milestones_total || 15} milestones completed</span>
           </div>
         </div>
 
@@ -79,7 +85,7 @@ export const DashboardPage: React.FC = () => {
           </div>
           <div className="flex items-baseline justify-between">
             <div className="text-2xl font-extrabold text-[var(--text-primary)] font-mono">
-              {Math.round(dashboard.readiness_score)}%
+              {readinessScore}%
             </div>
             <Badge tone="success">+12% month</Badge>
           </div>
@@ -91,7 +97,7 @@ export const DashboardPage: React.FC = () => {
           </div>
           <div className="flex items-baseline justify-between">
             <div className="text-2xl font-extrabold text-[var(--text-primary)] font-mono">
-              {dashboard.skill_gaps.mastered.length} <span className="text-xs text-[var(--text-tertiary)] font-normal">/ {dashboard.milestones_total}</span>
+              {masteredSkills.length} <span className="text-xs text-[var(--text-tertiary)] font-normal">/ {dashboard.milestones_total || 15}</span>
             </div>
             <Badge tone="neutral">Verified</Badge>
           </div>
@@ -103,7 +109,7 @@ export const DashboardPage: React.FC = () => {
           </div>
           <div className="flex items-baseline justify-between">
             <div className="text-2xl font-extrabold text-[var(--text-primary)] font-mono">
-              {Math.round((dashboard.milestones_completed / Math.max(1, dashboard.milestones_total)) * 100)}%
+              {Math.round(((dashboard.milestones_completed || 0) / Math.max(1, dashboard.milestones_total || 15)) * 100)}%
             </div>
             <Badge tone="brand">Phase 2</Badge>
           </div>
@@ -126,21 +132,23 @@ export const DashboardPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Next Best Action Card Spotlight */}
         <div className="lg:col-span-2">
-          <NextBestActionCard
-            action={dashboard.next_best_action}
-            onStartAction={() => setAssessmentOpen(true)}
-            onWhyThis={() => setWhyThisOpen(true)}
-          />
+          {dashboard.next_best_action && (
+            <NextBestActionCard
+              action={dashboard.next_best_action}
+              onStartAction={() => setAssessmentOpen(true)}
+              onWhyThis={() => setWhyThisOpen(true)}
+            />
+          )}
         </div>
 
         {/* Career Readiness Breakdown */}
         <div className="lg:col-span-1">
           <ReadinessGauge
-            score={dashboard.readiness_score}
-            careerTitle={dashboard.target_career.title}
-            strongSkills={dashboard.skill_gaps.mastered.map((s) => s.name).slice(0, 2)}
-            developingSkills={dashboard.skill_gaps.developing.map((s) => s.name).slice(0, 2)}
-            priorityGaps={dashboard.skill_gaps.missing.map((s) => s.name).slice(0, 2)}
+            score={dashboard.readiness_score || 0}
+            careerTitle={targetTitle}
+            strongSkills={masteredSkills.map((s) => s.name).slice(0, 2)}
+            developingSkills={developingSkills.map((s) => s.name).slice(0, 2)}
+            priorityGaps={missingSkills.map((s) => s.name).slice(0, 2)}
           />
         </div>
       </div>
@@ -194,10 +202,10 @@ export const DashboardPage: React.FC = () => {
             <div className="space-y-3">
               <div>
                 <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-1">
-                  Developing Skills ({dashboard.skill_gaps.developing.length})
+                  Developing Skills ({developingSkills.length})
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                  {dashboard.skill_gaps.developing.map((s) => (
+                  {developingSkills.map((s) => (
                     <SkillGapBadge key={s.skill_id} status="DEVELOPING" name={s.name} />
                   ))}
                 </div>
@@ -205,10 +213,10 @@ export const DashboardPage: React.FC = () => {
 
               <div>
                 <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-1">
-                  Next Priority Gaps ({dashboard.skill_gaps.missing.length})
+                  Next Priority Gaps ({missingSkills.length})
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                  {dashboard.skill_gaps.missing.slice(0, 3).map((s) => (
+                  {missingSkills.slice(0, 3).map((s) => (
                     <SkillGapBadge key={s.skill_id} status={s.status as any} name={s.name} />
                   ))}
                 </div>
@@ -235,13 +243,15 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* Modals */}
-      <WhyThisModal
-        isOpen={whyThisOpen}
-        onClose={() => setWhyThisOpen(false)}
-        skillName={dashboard.next_best_action.skill_name}
-        reason={dashboard.next_best_action.why_now}
-        careerTitle={dashboard.target_career.title}
-      />
+      {dashboard.next_best_action && (
+        <WhyThisModal
+          isOpen={whyThisOpen}
+          onClose={() => setWhyThisOpen(false)}
+          skillName={dashboard.next_best_action.skill_name}
+          reason={dashboard.next_best_action.why_now}
+          careerTitle={targetTitle}
+        />
+      )}
 
       <AssessmentModal
         isOpen={assessmentOpen}
