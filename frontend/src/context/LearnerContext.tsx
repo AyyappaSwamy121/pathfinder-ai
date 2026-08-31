@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { api, AuthResponseData } from '../services/api';
+import { api } from '../services/api';
 import { DashboardData, LearningPath, LearnerProfile } from '../types';
-import { useAuth } from './AuthContext';
 
 export interface UserState {
   id: string;
@@ -16,6 +15,7 @@ interface LearnerContextType {
   user: UserState | null;
   token: string | null;
   isAuthenticated: boolean;
+  isDemoMode: boolean;
   profile: LearnerProfile | null;
   dashboard: DashboardData | null;
   activePath: LearningPath | null;
@@ -26,6 +26,7 @@ interface LearnerContextType {
   logout: () => Promise<void>;
   refreshState: () => Promise<void>;
   loadPresetProfile: (preset: 'alex' | 'jordan' | 'devon') => Promise<void>;
+  exitDemoMode: () => Promise<void>;
 }
 
 const LearnerContext = createContext<LearnerContextType | undefined>(undefined);
@@ -36,6 +37,9 @@ export const LearnerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return savedUser ? JSON.parse(savedUser) : null;
   });
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('pathfinder_token'));
+  const [isDemoMode, setIsDemoMode] = useState<boolean>(() => {
+    return sessionStorage.getItem('pathfinder_demo_mode') === 'true';
+  });
 
   const [profile, setProfile] = useState<LearnerProfile | null>(null);
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
@@ -47,6 +51,24 @@ export const LearnerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     try {
       setLoading(true);
       setError(null);
+
+      // Check current Supabase Auth user
+      const me = await api.getMe();
+      if (me && me.user_id && me.user_id !== 'usr_alex_demo' && !isDemoMode) {
+        const userObj: UserState = {
+          id: me.user_id,
+          email: me.email,
+          first_name: me.first_name,
+          last_name: me.last_name,
+          college_name: me.college_name,
+          profile_id: me.profile_id,
+        };
+        setUser(userObj);
+        setToken(me.token);
+        localStorage.setItem('pathfinder_user', JSON.stringify(userObj));
+        localStorage.setItem('pathfinder_token', me.token);
+      }
+
       const dash = await api.getDashboard();
       const path = await api.getCurrentPath();
       setDashboard(dash);
@@ -62,9 +84,13 @@ export const LearnerProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   useEffect(() => {
     refreshState();
-  }, [token]);
+  }, [token, isDemoMode]);
 
   const login = async (email: string, password: string) => {
+    sessionStorage.setItem('pathfinder_demo_mode', 'false');
+    sessionStorage.removeItem('pathfinder_demo_preset');
+    setIsDemoMode(false);
+
     const res = await api.login({ email, password });
     const userObj: UserState = {
       id: res.user_id,
@@ -82,6 +108,10 @@ export const LearnerProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const signup = async (data: { first_name: string; last_name: string; college_name: string; email: string; password: string }) => {
+    sessionStorage.setItem('pathfinder_demo_mode', 'false');
+    sessionStorage.removeItem('pathfinder_demo_preset');
+    setIsDemoMode(false);
+
     const res = await api.signup(data);
     const userObj: UserState = {
       id: res.user_id,
@@ -99,6 +129,10 @@ export const LearnerProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const logout = async () => {
+    sessionStorage.setItem('pathfinder_demo_mode', 'false');
+    sessionStorage.removeItem('pathfinder_demo_preset');
+    setIsDemoMode(false);
+
     try {
       await api.logout();
     } catch (_) {}
@@ -110,28 +144,19 @@ export const LearnerProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const loadPresetProfile = async (preset: 'alex' | 'jordan' | 'devon') => {
-    let presetSkills = [
-      { name: 'Python Programming', level: 'Intermediate' },
-      { name: 'SQL & Relational Databases', level: 'Intermediate' },
-    ];
-    let careerId = 'c_ai_engineer';
+    sessionStorage.setItem('pathfinder_demo_mode', 'true');
+    sessionStorage.setItem('pathfinder_demo_preset', preset);
+    setIsDemoMode(true);
+
     let pName = 'Alex';
+    let careerId = 'c_ai_engineer';
 
     if (preset === 'jordan') {
-      presetSkills = [
-        { name: 'HTML5 & CSS3', level: 'Beginner' },
-        { name: 'Python Programming', level: 'Beginner' },
-      ];
-      careerId = 'c_data_analyst';
       pName = 'Jordan';
+      careerId = 'c_data_analyst';
     } else if (preset === 'devon') {
-      presetSkills = [
-        { name: 'TypeScript', level: 'Intermediate' },
-        { name: 'FastAPI & REST APIs', level: 'Intermediate' },
-        { name: 'Docker & Containerization', level: 'Intermediate' },
-      ];
-      careerId = 'c_fullstack_dev';
       pName = 'Devon';
+      careerId = 'c_fullstack_dev';
     }
 
     const demoUser: UserState = {
@@ -147,15 +172,13 @@ export const LearnerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     localStorage.setItem('pathfinder_token', `usr_${preset}_demo`);
     localStorage.setItem('pathfinder_user', JSON.stringify(demoUser));
 
-    await api.updateProfile({
-      target_career_id: careerId,
-      experience_level: preset === 'jordan' ? 'Beginner' : 'Intermediate',
-      weekly_hours: 10,
-      timeline_months: 6,
-      learning_preference: 'Project Based',
-      skills: presetSkills,
-    });
+    await refreshState();
+  };
 
+  const exitDemoMode = async () => {
+    sessionStorage.setItem('pathfinder_demo_mode', 'false');
+    sessionStorage.removeItem('pathfinder_demo_preset');
+    setIsDemoMode(false);
     await refreshState();
   };
 
@@ -165,6 +188,7 @@ export const LearnerProvider: React.FC<{ children: React.ReactNode }> = ({ child
         user,
         token,
         isAuthenticated: !!token || !!user,
+        isDemoMode,
         profile,
         dashboard,
         activePath,
@@ -175,6 +199,7 @@ export const LearnerProvider: React.FC<{ children: React.ReactNode }> = ({ child
         logout,
         refreshState,
         loadPresetProfile,
+        exitDemoMode,
       }}
     >
       {children}

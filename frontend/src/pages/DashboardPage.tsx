@@ -15,14 +15,17 @@ import { Badge } from '../components/ui/Badge';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts';
 
 export const DashboardPage: React.FC = () => {
-  const { dashboard, loading, refreshState, user: learnerUser } = useLearner();
+  const { dashboard, loading, refreshState, user: learnerUser, isDemoMode } = useLearner();
+  const { user: authUser } = useAuth();
 
   const [whyThisOpen, setWhyThisOpen] = useState(false);
   const [assessmentOpen, setAssessmentOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [selectedSkillForFeedback, setSelectedSkillForFeedback] = useState<string>('s_model_eval');
 
-  const firstName = learnerUser?.first_name || 'Alex';
+  const firstName = isDemoMode
+    ? (dashboard?.target_career?.title === 'Data Analyst' ? 'Jordan' : dashboard?.target_career?.title === 'Full Stack Developer' ? 'Devon' : 'Alex')
+    : (authUser?.first_name || learnerUser?.first_name || 'Student');
 
   if (loading || !dashboard) {
     return (

@@ -27,7 +27,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, setMobileOpen }) => {
   const location = useLocation();
-  const { dashboard } = useLearner();
+  const { dashboard, isDemoMode } = useLearner();
   const { user, isAuthenticated, logout } = useAuth();
 
   const primaryNav = [
@@ -44,10 +44,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, setMobileOpen }) =
     { path: '/architecture', label: 'System Architecture', icon: Cpu },
   ];
 
-  const displayName = user ? `${user.first_name} ${user.last_name}` : 'Alex Morgan';
-  const displayCollege = user?.college_name || 'Stanford University';
-  const initials = user
+  const displayName = isDemoMode
+    ? (dashboard?.target_career?.title === 'Data Analyst' ? 'Jordan Lee' : dashboard?.target_career?.title === 'Full Stack Developer' ? 'Devon Vance' : 'Alex Morgan')
+    : user
+    ? `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.name
+    : 'Student Workspace';
+
+  const displayCollege = isDemoMode
+    ? 'HCL Amplify Institute'
+    : user?.college_name || 'University Workspace';
+
+  const initials = isDemoMode
+    ? (displayName[0] || 'A')
+    : user
     ? `${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`.toUpperCase()
+    : 'S';
     : 'AM';
 
   return (

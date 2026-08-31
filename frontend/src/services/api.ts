@@ -330,31 +330,181 @@ export const api = {
   },
 
   getCurrentProfile: async (): Promise<LearnerProfile> => {
+    const isDemo = sessionStorage.getItem('pathfinder_demo_mode') === 'true';
+    const preset = sessionStorage.getItem('pathfinder_demo_preset') || 'alex';
+
+    if (isDemo) {
+      return {
+        id: `prof_${preset}_001`,
+        user_id: `usr_${preset}_demo`,
+        target_career_id: preset === 'jordan' ? 'c_data_analyst' : preset === 'devon' ? 'c_fullstack_dev' : 'c_ai_engineer',
+        experience_level: preset === 'jordan' ? 'Beginner' : 'Intermediate',
+        weekly_hours: 8,
+        timeline_months: 6,
+        learning_preference: 'Project Based',
+        readiness_score: preset === 'jordan' ? 25.0 : preset === 'devon' ? 55.0 : 41.3,
+        updated_at: new Date().toISOString(),
+      };
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
-    return {
-      id: user ? `prof_${user.id.slice(0, 12)}` : 'prof_alex_001',
-      user_id: user?.id || 'usr_alex_demo',
+    if (!user) {
+      return {
+        id: 'prof_guest',
+        user_id: 'guest',
+        target_career_id: 'c_ai_engineer',
+        experience_level: 'Beginner',
+        weekly_hours: 8,
+        timeline_months: 6,
+        learning_preference: 'Project Based',
+        readiness_score: 15.0,
+        updated_at: new Date().toISOString(),
+      };
+    }
+
+    // Fetch real learner profile from Supabase PostgreSQL
+    const { data: realProfile } = await supabase
+      .from('learner_profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+
+    if (realProfile) {
+      return {
+        id: realProfile.id,
+        user_id: realProfile.user_id,
+        target_career_id: realProfile.target_career_id || 'c_ai_engineer',
+        experience_level: realProfile.experience_level || 'Beginner',
+        weekly_hours: realProfile.weekly_hours || 8,
+        timeline_months: realProfile.timeline_months || 6,
+        learning_preference: realProfile.learning_preference || 'Project Based',
+        raw_onboarding_input: realProfile.raw_onboarding_input,
+        readiness_score: realProfile.readiness_score || 15.0,
+        updated_at: realProfile.updated_at || new Date().toISOString(),
+      };
+    }
+
+    // Auto-create default learner profile if first time
+    const newProfId = `prof_${user.id.slice(0, 12)}`;
+    await supabase.from('learner_profiles').upsert({
+      id: newProfId,
+      user_id: user.id,
       target_career_id: 'c_ai_engineer',
-      experience_level: 'Intermediate',
+      experience_level: 'Beginner',
       weekly_hours: 8,
       timeline_months: 6,
       learning_preference: 'Project Based',
-      readiness_score: 41.3,
+      readiness_score: 15.0,
+    });
+
+    return {
+      id: newProfId,
+      user_id: user.id,
+      target_career_id: 'c_ai_engineer',
+      experience_level: 'Beginner',
+      weekly_hours: 8,
+      timeline_months: 6,
+      learning_preference: 'Project Based',
+      readiness_score: 15.0,
       updated_at: new Date().toISOString(),
     };
   },
 
   // Dashboard & Navigation Data
   getDashboard: async (): Promise<DashboardData> => {
+    const isDemo = sessionStorage.getItem('pathfinder_demo_mode') === 'true';
+    const preset = sessionStorage.getItem('pathfinder_demo_preset') || 'alex';
+
     const profile = await api.getCurrentProfile();
     const targetCareer = SEED_CAREERS.find((c) => c.id === profile.target_career_id) || SEED_CAREERS[0];
 
-    const mastered: LearnerSkillStatus[] = [
+    if (isDemo) {
+      const mastered: LearnerSkillStatus[] = preset === 'jordan' ? [
+        { skill_id: 's_python', name: 'Python Basics', category: 'Language', proficiency: 'Beginner', confidence: 'Medium', status: 'MASTERED' }
+      ] : preset === 'devon' ? [
+        { skill_id: 's_ts', name: 'TypeScript Core', category: 'Language', proficiency: 'Intermediate', confidence: 'High', status: 'MASTERED' },
+        { skill_id: 's_fastapi', name: 'FastAPI Microservices', category: 'Backend', proficiency: 'Intermediate', confidence: 'High', status: 'MASTERED' },
+      ] : [
+        { skill_id: 's_python', name: 'Python Programming', category: 'Language', proficiency: 'Intermediate', confidence: 'High', status: 'MASTERED' },
+        { skill_id: 's_sql', name: 'SQL & Relational Databases', category: 'Data', proficiency: 'Intermediate', confidence: 'High', status: 'MASTERED' },
+      ];
+
+      const developing: LearnerSkillStatus[] = [
+        { skill_id: 's_model_eval', name: 'Model Evaluation & Metrics', category: 'ML', proficiency: 'Intermediate', confidence: 'Medium', status: 'DEVELOPING' },
+      ];
+
+      const missing: LearnerSkillStatus[] = [
+        { skill_id: 's_deep_learning', name: 'Deep Learning & PyTorch', category: 'AI', proficiency: 'Beginner', confidence: 'Low', status: 'MISSING' },
+      ];
+
+      return {
+        profile,
+        target_career: targetCareer,
+        readiness_score: profile.readiness_score || 41.3,
+        next_best_action: {
+          skill_id: 's_model_eval',
+          skill_name: 'Model Evaluation & Metrics',
+          title: 'Master Model Evaluation',
+          action_type: 'Assessment',
+          estimated_minutes: 90,
+          why_now: `Unlocks next milestone for ${targetCareer.title} path.`,
+          cta_label: 'Start Micro-Assessment',
+          item_id: 'a_model_eval',
+        },
+        milestones_completed: preset === 'jordan' ? 3 : preset === 'devon' ? 10 : 8,
+        milestones_total: 15,
+        skill_gaps: {
+          target_career: targetCareer.title,
+          readiness_score: profile.readiness_score || 41.3,
+          mastered,
+          developing,
+          missing,
+          locked: [],
+          recommended: developing,
+        },
+        ai_insight: `[Demo Workspace] Unlocked milestone 'Model Evaluation & Metrics' targeting ${targetCareer.title}.`,
+      };
+    }
+
+    // REAL AUTHENTICATED SUPABASE USER DASHBOARD
+    const { data: { user } } = await supabase.auth.getUser();
+    const meta = user?.user_metadata || {};
+    const firstName = meta.first_name || 'Learner';
+
+    // Fetch user skills from Supabase
+    const { data: dbSkills } = await supabase
+      .from('learner_skills')
+      .select('*')
+      .eq('profile_id', profile.id);
+
+    const mastered: LearnerSkillStatus[] = (dbSkills || [])
+      .filter((s: any) => s.status === 'MASTERED')
+      .map((s: any) => ({
+        skill_id: s.skill_id,
+        name: s.skill_id,
+        category: 'Skill',
+        proficiency: s.proficiency || 'Intermediate',
+        confidence: s.confidence || 'High',
+        status: 'MASTERED',
+      }));
+
+    const developing: LearnerSkillStatus[] = (dbSkills || [])
+      .filter((s: any) => s.status === 'DEVELOPING')
+      .map((s: any) => ({
+        skill_id: s.skill_id,
+        name: s.skill_id,
+        category: 'Skill',
+        proficiency: s.proficiency || 'Beginner',
+        confidence: s.confidence || 'Medium',
+        status: 'DEVELOPING',
+      }));
+
+    const defaultMastered: LearnerSkillStatus[] = mastered.length > 0 ? mastered : [
       { skill_id: 's_python', name: 'Python Programming', category: 'Language', proficiency: 'Intermediate', confidence: 'High', status: 'MASTERED' },
       { skill_id: 's_sql', name: 'SQL & Relational Databases', category: 'Data', proficiency: 'Intermediate', confidence: 'High', status: 'MASTERED' },
     ];
 
-    const developing: LearnerSkillStatus[] = [
+    const defaultDeveloping: LearnerSkillStatus[] = developing.length > 0 ? developing : [
       { skill_id: 's_model_eval', name: 'Model Evaluation & Metrics', category: 'ML', proficiency: 'Intermediate', confidence: 'Medium', status: 'DEVELOPING' },
     ];
 
@@ -365,29 +515,29 @@ export const api = {
     return {
       profile,
       target_career: targetCareer,
-      readiness_score: 41.3,
+      readiness_score: profile.readiness_score || 41.3,
       next_best_action: {
         skill_id: 's_model_eval',
         skill_name: 'Model Evaluation & Metrics',
         title: 'Master Model Evaluation',
         action_type: 'Assessment',
         estimated_minutes: 90,
-        why_now: 'Unlocks Deep Learning and addresses critical precision/recall gap for AI Engineering.',
+        why_now: `Critical gap for ${firstName}'s ${targetCareer.title} path.`,
         cta_label: 'Start Micro-Assessment',
         item_id: 'a_model_eval',
       },
-      milestones_completed: 8,
+      milestones_completed: defaultMastered.length + 6,
       milestones_total: 15,
       skill_gaps: {
         target_career: targetCareer.title,
-        readiness_score: 41.3,
-        mastered,
-        developing,
+        readiness_score: profile.readiness_score || 41.3,
+        mastered: defaultMastered,
+        developing: defaultDeveloping,
         missing,
         locked: [],
-        recommended: developing,
+        recommended: defaultDeveloping,
       },
-      ai_insight: `Your next milestone 'Model Evaluation & Metrics' is unlocked and addresses a critical requirement for ${targetCareer.title}.`,
+      ai_insight: `Welcome back, ${firstName}! Your personal ${targetCareer.title} roadmap is active in your Supabase workspace.`,
     };
   },
 

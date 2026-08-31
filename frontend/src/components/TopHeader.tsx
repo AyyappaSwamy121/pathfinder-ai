@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
-import { Menu, ChevronDown, ShieldCheck, UserCheck, PlusCircle, LogOut, User, School, Sparkles } from 'lucide-react';
+import { Menu, ChevronDown, ShieldCheck, UserCheck, PlusCircle, LogOut, User, School, Sparkles, XCircle } from 'lucide-react';
 import { useLearner } from '../context/LearnerContext';
 import { useAuth } from '../context/AuthContext';
 import { Button } from './ui/Button';
@@ -12,7 +12,7 @@ interface TopHeaderProps {
 export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { dashboard, loadPresetProfile } = useLearner();
+  const { dashboard, loadPresetProfile, isDemoMode, exitDemoMode } = useLearner();
   const { user, isAuthenticated, logout } = useAuth();
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [demoDropdownOpen, setDemoDropdownOpen] = useState(false);
@@ -46,10 +46,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
 
   const userFullName = user
     ? `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.name
-    : 'Guest';
-  const userInitials = user
-    ? `${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`.toUpperCase() || 'U'
-    : 'G';
+    : 'Student';
 
   return (
     <header className="h-[60px] bg-white border-b border-[#E2E8F0] sticky top-0 z-30 flex items-center justify-between px-6 font-sans">
@@ -79,7 +76,19 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
           <span>{currentCareerTitle}</span>
         </div>
 
-        {isAuthenticated && user ? (
+        {/* Demo Mode Exit Button if active */}
+        {isDemoMode && (
+          <button
+            onClick={() => exitDemoMode()}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-amber-800 border border-amber-300 text-xs font-bold hover:bg-amber-100 transition-colors"
+            title="Return to your real authenticated workspace"
+          >
+            <XCircle className="w-3.5 h-3.5 text-amber-600" />
+            <span>Exit Demo Mode</span>
+          </button>
+        )}
+
+        {isAuthenticated && user && !isDemoMode ? (
           /* Logged-in Real User Workspace Badge */
           <div className="relative">
             <button
@@ -87,26 +96,26 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#F0FDF4] text-[#15803D] border border-[#BBF7D0] hover:bg-[#DCFCE7] transition-colors"
             >
               <div className="w-2 h-2 rounded-full bg-[#16A34A] animate-pulse shrink-0" />
-              <span className="font-semibold text-[#0F172A] max-w-[140px] truncate">
+              <span className="font-semibold text-[#0F172A] max-w-[150px] truncate">
                 {userFullName}
               </span>
-              <span className="hidden sm:inline text-[11px] text-[#16A34A] font-semibold bg-white/70 px-1.5 py-0.5 rounded border border-[#BBF7D0]">
-                Live
+              <span className="hidden sm:inline text-[10px] text-[#16A34A] font-extrabold uppercase bg-white/80 px-1.5 py-0.5 rounded border border-[#BBF7D0]">
+                Workspace
               </span>
               <ChevronDown className="w-3.5 h-3.5 text-[#64748B]" />
             </button>
 
             {userDropdownOpen && (
               <div
-                className="absolute right-0 mt-2 w-60 bg-white border border-[#E2E8F0] rounded-xl shadow-lg z-50 py-1.5"
+                className="absolute right-0 mt-2 w-64 bg-white border border-[#E2E8F0] rounded-xl shadow-lg z-50 py-1.5"
                 onClick={() => setUserDropdownOpen(false)}
               >
                 <div className="px-3.5 py-2 border-b border-[#E2E8F0]">
                   <div className="text-xs font-bold text-[#0F172A] truncate">{userFullName}</div>
                   <div className="text-[11px] text-[#64748B] truncate">{user.email}</div>
-                  <div className="text-[10px] text-[#4338CA] font-medium mt-0.5 flex items-center gap-1">
+                  <div className="text-[10px] text-[#4338CA] font-medium mt-1 flex items-center gap-1">
                     <School className="w-3 h-3" />
-                    <span>{user.college_name || 'University'}</span>
+                    <span className="truncate">{user.college_name || 'University'}</span>
                   </div>
                 </div>
 
@@ -116,7 +125,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
                     className="w-full px-3.5 py-1.5 text-xs text-[#0F172A] hover:bg-[#F8FAFC] flex items-center gap-2"
                   >
                     <User className="w-3.5 h-3.5 text-[#64748B]" />
-                    <span>My Workspace</span>
+                    <span>Personal Workspace</span>
                   </Link>
                   <Link
                     to="/onboarding"
@@ -127,7 +136,28 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
                   </Link>
                 </div>
 
+                {/* Demo Presets Switcher Option for Evaluators */}
                 <div className="border-t border-[#E2E8F0] pt-1">
+                  <div className="px-3.5 py-1 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider">
+                    Evaluator Demo Presets
+                  </div>
+                  <button
+                    onClick={() => loadPresetProfile('alex')}
+                    className="w-full px-3.5 py-1.5 text-left text-xs text-[#475569] hover:bg-[#F8FAFC] flex items-center gap-2"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#4338CA]" />
+                    <span>Test Alex (AI Engineer)</span>
+                  </button>
+                  <button
+                    onClick={() => loadPresetProfile('jordan')}
+                    className="w-full px-3.5 py-1.5 text-left text-xs text-[#475569] hover:bg-[#F8FAFC] flex items-center gap-2"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#4338CA]" />
+                    <span>Test Jordan (Data Analyst)</span>
+                  </button>
+                </div>
+
+                <div className="border-t border-[#E2E8F0] pt-1 mt-1">
                   <button
                     onClick={() => {
                       logout();
@@ -143,22 +173,22 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
             )}
           </div>
         ) : (
-          /* Demo Persona Switcher (Only shown when not logged in) */
+          /* Demo Mode / Switcher Badge */
           <div className="relative">
             <button
               onClick={() => setDemoDropdownOpen(!demoDropdownOpen)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#F8FAFC] text-[#0F172A] border border-[#E2E8F0] hover:bg-[#F1F5F9] transition-colors"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100 transition-colors"
             >
-              <ShieldCheck className="w-3.5 h-3.5 text-[#4338CA]" />
-              <span className="text-[#64748B] hidden sm:inline">Demo:</span>
-              <span className="font-semibold truncate max-w-[120px] sm:max-w-none">
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
+              <span className="text-amber-700 hidden sm:inline">Demo:</span>
+              <span className="font-bold truncate max-w-[120px] sm:max-w-none">
                 {currentCareerTitle === 'Data Analyst'
                   ? 'Jordan (Analyst)'
                   : currentCareerTitle === 'Full Stack Developer'
                   ? 'Devon (Full Stack)'
                   : 'Alex (AI Eng)'}
               </span>
-              <ChevronDown className="w-3.5 h-3.5 text-[#94A3B8]" />
+              <ChevronDown className="w-3.5 h-3.5 text-amber-600" />
             </button>
 
             {demoDropdownOpen && (
@@ -197,14 +227,18 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
                     <div className="text-[11px] text-[#64748B]">Target: Full Stack (React / FastAPI)</div>
                   </div>
                 </button>
-                <div className="border-t border-[#E2E8F0] pt-1 px-3 py-1.5">
-                  <Link
-                    to="/login"
-                    className="text-xs text-[#4338CA] font-semibold hover:underline flex items-center gap-1"
-                  >
-                    <span>Sign in with your personal account →</span>
-                  </Link>
-                </div>
+
+                {isAuthenticated && (
+                  <div className="border-t border-[#E2E8F0] pt-1 px-3 py-1.5">
+                    <button
+                      onClick={() => exitDemoMode()}
+                      className="w-full text-left text-xs text-[#4338CA] font-bold hover:underline flex items-center gap-1"
+                    >
+                      <XCircle className="w-3.5 h-3.5" />
+                      <span>Return to My Real Workspace →</span>
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
