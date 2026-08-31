@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation, Link, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, MapPin, GitGraph, Briefcase, Award, Sliders, MessageSquareCode, Cpu, Menu, X, ShieldCheck, UserCheck, ChevronDown, LogOut, Settings, User
+  LayoutDashboard, MapPin, GitGraph, Briefcase, Award, Sliders, MessageSquareCode, Cpu, Menu, X, ShieldCheck, UserCheck, ChevronDown, LogOut
 } from 'lucide-react';
 import { useLearner } from '../../context/LearnerContext';
 import { Button } from '../ui/Button';
@@ -266,10 +266,13 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
               )}
             </div>
 
-      {/* Main Content Area */}
-      <div className="lg:pl-[250px] flex flex-col flex-1 min-h-screen">
-        {/* Top Header */}
-        <TopHeader onOpenMobileSidebar={() => setMobileOpen(true)} />
+            <Link to="/onboarding">
+              <Button size="sm" variant="primary">
+                Build Path
+              </Button>
+            </Link>
+          </div>
+        </header>
 
         {/* Main Content View */}
         <main className="flex-1 max-w-6xl w-full mx-auto px-8 py-8">
