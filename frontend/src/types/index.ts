@@ -165,6 +165,23 @@ export interface ChatResponse {
   suggested_actions?: string[];
 }
 
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  first_name: string;
+  last_name: string;
+  college_name: string;
+  is_onboarded: boolean;
+  profile_id: string;
+}
+
+export interface AuthTokenResponse {
+  access_token: string;
+  token_type: string;
+  user: AuthUser;
+}
+
 export interface DashboardData {
   profile: LearnerProfile;
   target_career: Career;
@@ -175,3 +192,5 @@ export interface DashboardData {
   skill_gaps: SkillGapAnalysis;
   ai_insight: string;
 }
+
+

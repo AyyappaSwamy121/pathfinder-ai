@@ -7,6 +7,7 @@ from backend.config import settings
 from backend.database.session import engine, Base, SessionLocal
 from backend.seed.seed_loader import init_seed_database
 
+from backend.api.auth_router import router as auth_router
 from backend.api.profile_router import router as profile_router
 from backend.api.career_router import router as career_router
 from backend.api.roadmap_router import router as roadmap_router
@@ -45,6 +46,7 @@ app.add_middleware(
 )
 
 # Include Routers
+app.include_router(auth_router)
 app.include_router(profile_router)
 app.include_router(career_router)
 app.include_router(roadmap_router)

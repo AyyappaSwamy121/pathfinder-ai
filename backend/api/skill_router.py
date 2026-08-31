@@ -7,6 +7,9 @@ from backend.models.domain import Skill, SkillPrerequisite
 from backend.services.skill_gap_engine import SkillGapEngine
 from backend.seed.seed_data import DEMO_PROFILE_ID
 
+from backend.api.auth_router import get_current_user_optional
+from backend.models.domain import User
+
 router = APIRouter(prefix="/api/skills", tags=["Skills & Knowledge Graph"])
 
 @router.get("", response_model=List[SkillSchema])
@@ -33,7 +36,11 @@ def get_all_skills(db: Session = Depends(get_db)):
     return res
 
 @router.get("/gaps", response_model=SkillGapAnalysisResponse)
-def get_skill_gaps(db: Session = Depends(get_db)):
-    """Analyze skill gaps for the demo learner."""
-    analysis = SkillGapEngine.analyze_gaps(db, DEMO_PROFILE_ID)
+def get_skill_gaps(
+    db: Session = Depends(get_db),
+    user_and_pid: tuple[User, str] = Depends(get_current_user_optional)
+):
+    """Analyze skill gaps for the learner."""
+    user, profile_id = user_and_pid
+    analysis = SkillGapEngine.analyze_gaps(db, profile_id)
     return analysis

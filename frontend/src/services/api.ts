@@ -8,29 +8,84 @@ import {
   AssessmentDetail,
   AssessmentEvaluateResponse,
   SimulateCareerResponse,
-  ChatResponse
+  ChatResponse,
+  AuthTokenResponse,
+  AuthUser,
 } from '../types';
 
 const API_BASE = '/api';
 
+export function getStoredToken(): string | null {
+  return localStorage.getItem('pathfinder_token');
+}
+
+export function setStoredToken(token: string | null) {
+  if (token) {
+    localStorage.setItem('pathfinder_token', token);
+  } else {
+    localStorage.removeItem('pathfinder_token');
+  }
+}
+
 async function fetchJSON<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const token = getStoredToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options?.headers as Record<string, string>),
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const res = await fetch(`${API_BASE}${endpoint}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
     ...options,
+    headers,
   });
 
   if (!res.ok) {
     const errorText = await res.text();
-    throw new Error(`API error (${res.status}): ${errorText}`);
+    let errorDetail = errorText;
+    try {
+      const parsed = JSON.parse(errorText);
+      if (parsed.detail) {
+        errorDetail = parsed.detail;
+      }
+    } catch {
+      // Keep errorText
+    }
+    throw new Error(errorDetail);
   }
 
   return res.json();
 }
 
 export const api = {
+  // Authentication
+  signup: (data: {
+    first_name: string;
+    last_name: string;
+    college_name: string;
+    email: string;
+    password: string;
+  }) =>
+    fetchJSON<AuthTokenResponse>('/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  login: (data: { email: string; password: string }) =>
+    fetchJSON<AuthTokenResponse>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  getMe: () => fetchJSON<AuthUser>('/auth/me'),
+
+  logout: () =>
+    fetchJSON<{ status: string; message: string }>('/auth/logout', {
+      method: 'POST',
+    }),
   // Onboarding & Profile
   analyzeProfile: (text: string) =>
     fetchJSON<ProfileExtractResponse>('/profile/analyze', {

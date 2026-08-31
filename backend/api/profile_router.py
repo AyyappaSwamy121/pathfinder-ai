@@ -10,6 +10,8 @@ from backend.seed.seed_data import DEMO_PROFILE_ID, DEMO_USER_ID
 from backend.services.skill_gap_engine import SkillGapEngine
 from backend.services.roadmap_engine import RoadmapEngine
 
+from backend.api.auth_router import get_current_user_optional
+
 router = APIRouter(prefix="/api/profile", tags=["Profile"])
 
 @router.post("/analyze", response_model=ProfileExtractResponse)
@@ -22,19 +24,30 @@ def analyze_profile(req: ProfileAnalyzeRequest):
     return extracted
 
 @router.get("/current", response_model=LearnerProfileSchema)
-def get_current_profile(db: Session = Depends(get_db)):
-    """Fetch current demo learner profile."""
-    profile = db.query(LearnerProfile).filter(LearnerProfile.id == DEMO_PROFILE_ID).first()
+def get_current_profile(
+    db: Session = Depends(get_db),
+    user_and_pid: tuple[User, str] = Depends(get_current_user_optional)
+):
+    """Fetch current learner profile for authenticated user or demo mode."""
+    user, profile_id = user_and_pid
+    profile = db.query(LearnerProfile).filter(LearnerProfile.id == profile_id).first()
     if not profile:
-        raise HTTPException(status_code=404, detail="Demo profile not found")
+        profile = LearnerProfile(id=profile_id, user_id=user.id if user else DEMO_USER_ID)
+        db.add(profile)
+        db.commit()
     return profile
 
 @router.post("/update")
-def update_profile(req: ProfileUpdateRequest, db: Session = Depends(get_db)):
+def update_profile(
+    req: ProfileUpdateRequest,
+    db: Session = Depends(get_db),
+    user_and_pid: tuple[User, str] = Depends(get_current_user_optional)
+):
     """Update profile preferences, target career, and extracted skills."""
-    profile = db.query(LearnerProfile).filter(LearnerProfile.id == DEMO_PROFILE_ID).first()
+    user, profile_id = user_and_pid
+    profile = db.query(LearnerProfile).filter(LearnerProfile.id == profile_id).first()
     if not profile:
-        profile = LearnerProfile(id=DEMO_PROFILE_ID, user_id=DEMO_USER_ID)
+        profile = LearnerProfile(id=profile_id, user_id=user.id if user else DEMO_USER_ID)
         db.add(profile)
 
     profile.target_career_id = req.target_career_id
@@ -43,19 +56,21 @@ def update_profile(req: ProfileUpdateRequest, db: Session = Depends(get_db)):
     profile.timeline_months = req.timeline_months
     profile.learning_preference = req.learning_preference
 
+    if user:
+        user.is_onboarded = True
+
     # Sync skills
     for item in req.skills:
-        # Find matching skill
         skill_obj = db.query(Skill).filter(Skill.name.ilike(f"%{item.name}%")).first()
         if skill_obj:
             ls = db.query(LearnerSkill).filter(
-                LearnerSkill.profile_id == DEMO_PROFILE_ID,
+                LearnerSkill.profile_id == profile_id,
                 LearnerSkill.skill_id == skill_obj.id
             ).first()
             if not ls:
                 ls = LearnerSkill(
-                    id=f"ls_{DEMO_PROFILE_ID}_{skill_obj.id}",
-                    profile_id=DEMO_PROFILE_ID,
+                    id=f"ls_{profile_id}_{skill_obj.id}",
+                    profile_id=profile_id,
                     skill_id=skill_obj.id
                 )
                 db.add(ls)
@@ -66,7 +81,7 @@ def update_profile(req: ProfileUpdateRequest, db: Session = Depends(get_db)):
     db.commit()
 
     # Trigger gap analysis and roadmap generation
-    SkillGapEngine.analyze_gaps(db, DEMO_PROFILE_ID)
-    RoadmapEngine.generate_roadmap(db, DEMO_PROFILE_ID)
+    SkillGapEngine.analyze_gaps(db, profile_id)
+    RoadmapEngine.generate_roadmap(db, profile_id)
 
     return {"status": "success", "message": "Profile updated and path generated successfully"}
