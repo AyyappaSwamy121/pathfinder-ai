@@ -6,7 +6,7 @@ from backend.models.domain import LearnerProfile, Career, LearningPath, PathStep
 from backend.services.skill_gap_engine import SkillGapEngine
 from backend.services.recommendation_engine import HybridRecommendationEngine
 from backend.services.roadmap_engine import RoadmapEngine
-from backend.seed.seed_data import DEMO_PROFILE_ID
+from backend.api.auth_router import get_current_profile_id
 
 from backend.api.auth_router import get_current_user_optional
 from backend.models.domain import User
@@ -16,10 +16,9 @@ router = APIRouter(prefix="/api/dashboard", tags=["Dashboard"])
 @router.get("", response_model=DashboardResponse)
 def get_dashboard(
     db: Session = Depends(get_db),
-    user_and_pid: tuple[User, str] = Depends(get_current_user_optional)
+    profile_id: str = Depends(get_current_profile_id)
 ):
-    """Fetch complete learner dashboard data including readiness, next best action, gaps, and roadmap stats."""
-    user, profile_id = user_and_pid
+    """Fetch complete learner dashboard data for the active user session."""
     profile = db.query(LearnerProfile).filter(LearnerProfile.id == profile_id).first()
     if not profile:
         profile = LearnerProfile(id=profile_id, user_id=user.id if user else DEMO_PROFILE_ID)

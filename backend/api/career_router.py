@@ -8,7 +8,7 @@ from backend.schemas.pydantic_models import (
 )
 from backend.models.domain import Career, CareerSkill, Skill
 from backend.services.simulator_engine import SimulatorEngine
-from backend.seed.seed_data import DEMO_PROFILE_ID
+from backend.api.auth_router import get_current_profile_id
 
 from backend.api.auth_router import get_current_user_optional
 from backend.models.domain import User
@@ -68,10 +68,9 @@ def get_career_detail(career_id: str, db: Session = Depends(get_db)):
 def simulate_career(
     req: SimulateCareerRequest,
     db: Session = Depends(get_db),
-    user_and_pid: tuple[User, str] = Depends(get_current_user_optional)
+    profile_id: str = Depends(get_current_profile_id)
 ):
     """What-if Career Simulator endpoint."""
-    user, profile_id = user_and_pid
     res = SimulatorEngine.simulate_career_transition(db, profile_id, req.target_career_id)
     return res
 
@@ -79,7 +78,7 @@ def simulate_career(
 def compare_careers(
     req: CareerComparisonRequest,
     db: Session = Depends(get_db),
-    user_and_pid: tuple[User, str] = Depends(get_current_user_optional)
+    profile_id: str = Depends(get_current_profile_id)
 ):
     """Compare two career targets side by side."""
     user, profile_id = user_and_pid

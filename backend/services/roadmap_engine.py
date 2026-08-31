@@ -1,3 +1,4 @@
+import uuid
 from typing import Dict, Any, List, Optional
 from sqlalchemy.orm import Session
 from backend.models.domain import (
@@ -16,8 +17,11 @@ class RoadmapEngine:
         Attaches Resources, Projects, Assessments, and AI explanations for every step.
         """
         profile = db.query(LearnerProfile).filter(LearnerProfile.id == profile_id).first()
-        target_career_id = career_id or profile.target_career_id or "c_ai_engineer"
+        target_career_id = career_id or (profile.target_career_id if profile else "c_ai_engineer") or "c_ai_engineer"
         career = db.query(Career).filter(Career.id == target_career_id).first()
+        if not career:
+            career = db.query(Career).filter(Career.id == "c_ai_engineer").first()
+            target_career_id = "c_ai_engineer"
 
         # Fetch required career skills
         career_skills = db.query(CareerSkill).filter(CareerSkill.career_id == target_career_id).all()
@@ -48,17 +52,14 @@ class RoadmapEngine:
         for skill_id in required_skill_ids:
             visit(skill_id)
 
-        # Clear existing path for profile if recreating
-        existing_path = db.query(LearningPath).filter(
-            LearningPath.profile_id == profile_id,
-            LearningPath.career_id == target_career_id
-        ).first()
+        # Clear existing paths and steps for profile to avoid primary key collisions
+        existing_paths = db.query(LearningPath).filter(LearningPath.profile_id == profile_id).all()
+        for ep in existing_paths:
+            db.query(PathStep).filter(PathStep.path_id == ep.id).delete(synchronize_session=False)
+            db.delete(ep)
+        db.commit()
 
-        if existing_path:
-            db.delete(existing_path)
-            db.commit()
-
-        path_id = f"path_{profile_id}_{target_career_id}"
+        path_id = f"path_{profile_id}_{uuid.uuid4().hex[:8]}"
         new_path = LearningPath(
             id=path_id,
             profile_id=profile_id,

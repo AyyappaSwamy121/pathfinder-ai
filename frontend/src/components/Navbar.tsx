@@ -1,11 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Compass, LayoutDashboard, LogIn, User } from 'lucide-react';
+import { ArrowRight, LayoutDashboard, User } from 'lucide-react';
 import { Button } from './ui/Button';
-import { useAuth } from '../context/AuthContext';
+import { useLearner } from '../context/LearnerContext';
 
 export const Navbar: React.FC = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useLearner();
 
   return (
     <header className="h-[60px] bg-white border-b border-[#E2E8F0] sticky top-0 z-40">
@@ -19,7 +19,7 @@ export const Navbar: React.FC = () => {
             <span className="text-[#0F172A] font-bold text-sm leading-none block tracking-tight">
               PATHFINDER
             </span>
-            <span className="text-[10px] text-[#64748B] font-medium leading-none block mt-1">
+            <span className="text-[10px] text-[var(--text-tertiary)] font-medium leading-none block mt-0.5">
               Career Intelligence Platform
             </span>
           </div>
@@ -42,33 +42,34 @@ export const Navbar: React.FC = () => {
         {/* Actions */}
         <div className="flex items-center gap-3">
           {isAuthenticated ? (
-            <Link to="/dashboard">
-              <Button size="sm" variant="secondary" className="flex items-center gap-1.5 text-xs py-1.5">
-                <User className="w-3.5 h-3.5 text-[#4338CA]" />
-                <span>{user?.first_name || 'Dashboard'}</span>
-              </Button>
-            </Link>
+            <>
+              <Link to="/dashboard">
+                <Button size="sm" variant="ghost">
+                  <span>Workspace ({user?.first_name || 'Student'})</span>
+                </Button>
+              </Link>
+              <Link to="/onboarding">
+                <Button size="sm" variant="primary">
+                  <span>Build Path</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Button>
+              </Link>
+            </>
           ) : (
             <>
               <Link to="/login">
-                <Button size="sm" variant="ghost" className="text-xs py-1.5 text-[#475569] hover:text-[#0F172A]">
+                <Button size="sm" variant="ghost">
                   Sign In
                 </Button>
               </Link>
               <Link to="/signup">
-                <Button size="sm" variant="secondary" className="text-xs py-1.5 border-[#CBD5E1]">
-                  Sign Up
+                <Button size="sm" variant="primary">
+                  <span>Create Account</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </Button>
               </Link>
             </>
           )}
-
-          <Link to="/onboarding">
-            <Button size="sm" className="bg-[#4338CA] hover:bg-[#3730A3] text-white flex items-center gap-1.5 text-xs py-1.5 shadow-xs">
-              <span>Build Path</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Button>
-          </Link>
         </div>
       </div>
     </header>

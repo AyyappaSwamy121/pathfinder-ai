@@ -6,9 +6,9 @@ from backend.schemas.pydantic_models import (
 )
 from backend.models.domain import LearnerProfile, LearnerSkill, Skill, User
 from backend.ai.llm_client import llm_client
-from backend.seed.seed_data import DEMO_PROFILE_ID, DEMO_USER_ID
 from backend.services.skill_gap_engine import SkillGapEngine
 from backend.services.roadmap_engine import RoadmapEngine
+from backend.api.auth_router import get_current_profile_id, get_current_user_id
 
 from backend.api.auth_router import get_current_user_optional
 
@@ -26,28 +26,25 @@ def analyze_profile(req: ProfileAnalyzeRequest):
 @router.get("/current", response_model=LearnerProfileSchema)
 def get_current_profile(
     db: Session = Depends(get_db),
-    user_and_pid: tuple[User, str] = Depends(get_current_user_optional)
+    profile_id: str = Depends(get_current_profile_id)
 ):
-    """Fetch current learner profile for authenticated user or demo mode."""
-    user, profile_id = user_and_pid
+    """Fetch current authenticated learner profile."""
     profile = db.query(LearnerProfile).filter(LearnerProfile.id == profile_id).first()
     if not profile:
-        profile = LearnerProfile(id=profile_id, user_id=user.id if user else DEMO_USER_ID)
-        db.add(profile)
-        db.commit()
+        raise HTTPException(status_code=404, detail="Learner profile not found")
     return profile
 
 @router.post("/update")
 def update_profile(
     req: ProfileUpdateRequest,
     db: Session = Depends(get_db),
-    user_and_pid: tuple[User, str] = Depends(get_current_user_optional)
+    profile_id: str = Depends(get_current_profile_id),
+    user_id: str = Depends(get_current_user_id)
 ):
     """Update profile preferences, target career, and extracted skills."""
-    user, profile_id = user_and_pid
     profile = db.query(LearnerProfile).filter(LearnerProfile.id == profile_id).first()
     if not profile:
-        profile = LearnerProfile(id=profile_id, user_id=user.id if user else DEMO_USER_ID)
+        profile = LearnerProfile(id=profile_id, user_id=user_id)
         db.add(profile)
 
     profile.target_career_id = req.target_career_id

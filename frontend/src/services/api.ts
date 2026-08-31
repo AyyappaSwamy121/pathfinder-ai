@@ -13,7 +13,20 @@ import {
   AuthUser,
 } from '../types';
 
-const API_BASE = '/api';
+const envBase = (import.meta as any).env?.VITE_API_BASE_URL;
+const API_BASE = envBase ? `${envBase.replace(/\/$/, '')}/api` : '/api';
+
+export interface AuthResponseData {
+  token: str;
+  user_id: str;
+  email: str;
+  first_name: str;
+  last_name: str;
+  college_name: str;
+  profile_id: str;
+}
+
+type str = string;
 
 export function getStoredToken(): string | null {
   return localStorage.getItem('pathfinder_token');
@@ -28,7 +41,7 @@ export function setStoredToken(token: string | null) {
 }
 
 async function fetchJSON<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const token = getStoredToken();
+  const token = localStorage.getItem('pathfinder_token');
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options?.headers as Record<string, string>),
@@ -45,23 +58,25 @@ async function fetchJSON<T>(endpoint: string, options?: RequestInit): Promise<T>
 
   if (!res.ok) {
     const errorText = await res.text();
-    let errorDetail = errorText;
+    let parsedMsg = errorText;
     try {
-      const parsed = JSON.parse(errorText);
-      if (parsed.detail) {
-        errorDetail = parsed.detail;
+      const errObj = JSON.parse(errorText);
+      if (typeof errObj.detail === 'string') {
+        parsedMsg = errObj.detail;
+      } else if (Array.isArray(errObj.detail)) {
+        parsedMsg = errObj.detail.map((e: any) => e.msg || JSON.stringify(e)).join(', ');
+      } else if (errObj.message) {
+        parsedMsg = errObj.message;
       }
-    } catch {
-      // Keep errorText
-    }
-    throw new Error(errorDetail);
+    } catch (_) {}
+    throw new Error(parsedMsg || 'Request failed');
   }
 
   return res.json();
 }
 
 export const api = {
-  // Authentication
+  // Authentication API
   signup: (data: {
     first_name: string;
     last_name: string;
@@ -69,23 +84,24 @@ export const api = {
     email: string;
     password: string;
   }) =>
-    fetchJSON<AuthTokenResponse>('/auth/signup', {
+    fetchJSON<AuthResponseData>('/auth/signup', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
   login: (data: { email: string; password: string }) =>
-    fetchJSON<AuthTokenResponse>('/auth/login', {
+    fetchJSON<AuthResponseData>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
-  getMe: () => fetchJSON<AuthUser>('/auth/me'),
+  getMe: () => fetchJSON<AuthResponseData>('/auth/me'),
 
   logout: () =>
-    fetchJSON<{ status: string; message: string }>('/auth/logout', {
+    fetchJSON<{ message: string }>('/auth/logout', {
       method: 'POST',
     }),
+
   // Onboarding & Profile
   analyzeProfile: (text: string) =>
     fetchJSON<ProfileExtractResponse>('/profile/analyze', {

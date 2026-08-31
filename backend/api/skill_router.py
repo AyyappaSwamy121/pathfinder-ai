@@ -5,7 +5,7 @@ from backend.database.session import get_db
 from backend.schemas.pydantic_models import SkillSchema, SkillGapAnalysisResponse
 from backend.models.domain import Skill, SkillPrerequisite
 from backend.services.skill_gap_engine import SkillGapEngine
-from backend.seed.seed_data import DEMO_PROFILE_ID
+from backend.api.auth_router import get_current_profile_id
 
 from backend.api.auth_router import get_current_user_optional
 from backend.models.domain import User
@@ -38,9 +38,8 @@ def get_all_skills(db: Session = Depends(get_db)):
 @router.get("/gaps", response_model=SkillGapAnalysisResponse)
 def get_skill_gaps(
     db: Session = Depends(get_db),
-    user_and_pid: tuple[User, str] = Depends(get_current_user_optional)
+    profile_id: str = Depends(get_current_profile_id)
 ):
-    """Analyze skill gaps for the learner."""
-    user, profile_id = user_and_pid
+    """Analyze skill gaps for the active learner session."""
     analysis = SkillGapEngine.analyze_gaps(db, profile_id)
     return analysis

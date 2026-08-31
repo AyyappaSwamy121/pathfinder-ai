@@ -7,7 +7,7 @@ from backend.schemas.pydantic_models import (
 )
 from backend.models.domain import Assessment, Skill
 from backend.services.adaptive_engine import AdaptiveLearningEngine
-from backend.seed.seed_data import DEMO_PROFILE_ID
+from backend.api.auth_router import get_current_profile_id
 
 from backend.api.auth_router import get_current_user_optional
 from backend.models.domain import User
@@ -19,7 +19,6 @@ def get_assessment(assessment_id: str, db: Session = Depends(get_db)):
     """Fetch assessment detail with multiple choice questions."""
     asm = db.query(Assessment).filter(Assessment.id == assessment_id).first()
     if not asm:
-        # Fallback to first available assessment if not found
         asm = db.query(Assessment).first()
         if not asm:
             raise HTTPException(status_code=404, detail="No assessment found")
@@ -47,7 +46,7 @@ def get_assessment(assessment_id: str, db: Session = Depends(get_db)):
 def evaluate_assessment(
     req: AssessmentEvaluateRequest,
     db: Session = Depends(get_db),
-    user_and_pid: tuple[User, str] = Depends(get_current_user_optional)
+    profile_id: str = Depends(get_current_profile_id)
 ):
     """Submit assessment answers and receive score, feedback, and adaptive roadmap updates."""
     user, profile_id = user_and_pid
@@ -60,7 +59,7 @@ def evaluate_assessment(
 def submit_feedback(
     req: FeedbackSubmitRequest,
     db: Session = Depends(get_db),
-    user_and_pid: tuple[User, str] = Depends(get_current_user_optional)
+    profile_id: str = Depends(get_current_profile_id)
 ):
     """Submit 5-tier confidence feedback (Struggling, Need Practice, Comfortable, Confident, Too Easy)."""
     user, profile_id = user_and_pid

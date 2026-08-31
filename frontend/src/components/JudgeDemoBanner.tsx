@@ -6,9 +6,7 @@ import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
 
 export const JudgeDemoBanner: React.FC = () => {
-  const { judgeMode, loadPresetProfile } = useLearner();
-
-  if (!judgeMode) return null;
+  const { loadPresetProfile } = useLearner();
 
   return (
     <div className="bg-[var(--surface-sunken)] border-b border-[var(--border)] py-2 px-6 text-xs">

@@ -1,16 +1,29 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { api } from '../services/api';
+import { api, AuthResponseData } from '../services/api';
 import { DashboardData, LearningPath, LearnerProfile } from '../types';
 import { useAuth } from './AuthContext';
 
+export interface UserState {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  college_name: string;
+  profile_id: string;
+}
+
 interface LearnerContextType {
+  user: UserState | null;
+  token: string | null;
+  isAuthenticated: boolean;
   profile: LearnerProfile | null;
   dashboard: DashboardData | null;
   activePath: LearningPath | null;
   loading: boolean;
   error: string | null;
-  judgeMode: boolean;
-  toggleJudgeMode: () => void;
+  signup: (data: { first_name: string; last_name: string; college_name: string; email: string; password: string }) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
   refreshState: () => Promise<void>;
   loadPresetProfile: (preset: 'alex' | 'jordan' | 'devon') => Promise<void>;
 }
@@ -18,13 +31,17 @@ interface LearnerContextType {
 const LearnerContext = createContext<LearnerContextType | undefined>(undefined);
 
 export const LearnerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { token, isAuthenticated } = useAuth();
+  const [user, setUser] = useState<UserState | null>(() => {
+    const savedUser = localStorage.getItem('pathfinder_user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('pathfinder_token'));
+
   const [profile, setProfile] = useState<LearnerProfile | null>(null);
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [activePath, setActivePath] = useState<LearningPath | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [judgeMode, setJudgeMode] = useState<boolean>(true);
 
   const refreshState = async () => {
     try {
@@ -47,8 +64,50 @@ export const LearnerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     refreshState();
   }, [token]);
 
+  const login = async (email: string, password: string) => {
+    const res = await api.login({ email, password });
+    const userObj: UserState = {
+      id: res.user_id,
+      email: res.email,
+      first_name: res.first_name,
+      last_name: res.last_name,
+      college_name: res.college_name,
+      profile_id: res.profile_id,
+    };
+    setUser(userObj);
+    setToken(res.token);
+    localStorage.setItem('pathfinder_token', res.token);
+    localStorage.setItem('pathfinder_user', JSON.stringify(userObj));
+    await refreshState();
+  };
 
-  const toggleJudgeMode = () => setJudgeMode(!judgeMode);
+  const signup = async (data: { first_name: string; last_name: string; college_name: string; email: string; password: string }) => {
+    const res = await api.signup(data);
+    const userObj: UserState = {
+      id: res.user_id,
+      email: res.email,
+      first_name: res.first_name,
+      last_name: res.last_name,
+      college_name: res.college_name,
+      profile_id: res.profile_id,
+    };
+    setUser(userObj);
+    setToken(res.token);
+    localStorage.setItem('pathfinder_token', res.token);
+    localStorage.setItem('pathfinder_user', JSON.stringify(userObj));
+    await refreshState();
+  };
+
+  const logout = async () => {
+    try {
+      await api.logout();
+    } catch (_) {}
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('pathfinder_token');
+    localStorage.removeItem('pathfinder_user');
+    await refreshState();
+  };
 
   const loadPresetProfile = async (preset: 'alex' | 'jordan' | 'devon') => {
     let presetSkills = [
@@ -56,6 +115,7 @@ export const LearnerProvider: React.FC<{ children: React.ReactNode }> = ({ child
       { name: 'SQL & Relational Databases', level: 'Intermediate' },
     ];
     let careerId = 'c_ai_engineer';
+    let pName = 'Alex';
 
     if (preset === 'jordan') {
       presetSkills = [
@@ -63,6 +123,7 @@ export const LearnerProvider: React.FC<{ children: React.ReactNode }> = ({ child
         { name: 'Python Programming', level: 'Beginner' },
       ];
       careerId = 'c_data_analyst';
+      pName = 'Jordan';
     } else if (preset === 'devon') {
       presetSkills = [
         { name: 'TypeScript', level: 'Intermediate' },
@@ -70,7 +131,21 @@ export const LearnerProvider: React.FC<{ children: React.ReactNode }> = ({ child
         { name: 'Docker & Containerization', level: 'Intermediate' },
       ];
       careerId = 'c_fullstack_dev';
+      pName = 'Devon';
     }
+
+    const demoUser: UserState = {
+      id: `usr_${preset}_demo`,
+      email: `${preset}@demo.hcl`,
+      first_name: pName,
+      last_name: 'Evaluator',
+      college_name: 'HCL Amplify Institute',
+      profile_id: `prof_${preset}_001`,
+    };
+    setUser(demoUser);
+    setToken(`usr_${preset}_demo`);
+    localStorage.setItem('pathfinder_token', `usr_${preset}_demo`);
+    localStorage.setItem('pathfinder_user', JSON.stringify(demoUser));
 
     await api.updateProfile({
       target_career_id: careerId,
@@ -87,13 +162,17 @@ export const LearnerProvider: React.FC<{ children: React.ReactNode }> = ({ child
   return (
     <LearnerContext.Provider
       value={{
+        user,
+        token,
+        isAuthenticated: !!token || !!user,
         profile,
         dashboard,
         activePath,
         loading,
         error,
-        judgeMode,
-        toggleJudgeMode,
+        signup,
+        login,
+        logout,
         refreshState,
         loadPresetProfile,
       }}
