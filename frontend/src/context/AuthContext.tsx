@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { api, getStoredToken, setStoredToken } from '../services/api';
+import { api, supabase } from '../services/api';
 import { AuthUser } from '../types';
 
 interface AuthContextType {
@@ -24,35 +24,56 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [token, setToken] = useState<string | null>(getStoredToken());
+  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const initAuth = async () => {
-    const existingToken = getStoredToken();
-    if (existingToken) {
-      try {
-        const userData = await api.getMe();
-        setUser(userData);
-        setToken(existingToken);
-      } catch (err) {
-        console.warn('Session verification failed, resetting token:', err);
-        setStoredToken(null);
-        setToken(null);
-        setUser(null);
+  const syncAuth = async () => {
+    try {
+      const res = await api.getMe();
+      if (res) {
+        setUser({
+          id: res.user_id,
+          email: res.email,
+          name: `${res.first_name} ${res.last_name}`,
+          first_name: res.first_name,
+          last_name: res.last_name,
+          college_name: res.college_name,
+          is_onboarded: true,
+          profile_id: res.profile_id,
+        });
+        setToken(res.token);
       }
+    } catch {
+      setUser(null);
+      setToken(null);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
-    initAuth();
+    syncAuth();
+    const { data: authListener } = supabase.auth.onAuthStateChange(() => {
+      syncAuth();
+    });
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (credentials: { email: string; password: string }) => {
     const res = await api.login(credentials);
-    setStoredToken(res.access_token);
-    setToken(res.access_token);
-    setUser(res.user);
+    setUser({
+      id: res.user_id,
+      email: res.email,
+      name: `${res.first_name} ${res.last_name}`,
+      first_name: res.first_name,
+      last_name: res.last_name,
+      college_name: res.college_name,
+      is_onboarded: true,
+      profile_id: res.profile_id,
+    });
+    setToken(res.token);
   };
 
   const signup = async (data: {
@@ -63,20 +84,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     password: string;
   }) => {
     const res = await api.signup(data);
-    setStoredToken(res.access_token);
-    setToken(res.access_token);
-    setUser(res.user);
+    setUser({
+      id: res.user_id,
+      email: res.email,
+      name: `${res.first_name} ${res.last_name}`,
+      first_name: res.first_name,
+      last_name: res.last_name,
+      college_name: res.college_name,
+      is_onboarded: true,
+      profile_id: res.profile_id,
+    });
+    setToken(res.token);
   };
 
   const logout = async () => {
-    try {
-      await api.logout();
-    } catch {
-      // Ignore error on network disconnect
-    }
-    setStoredToken(null);
-    setToken(null);
+    await api.logout();
     setUser(null);
+    setToken(null);
   };
 
   const updateOnboarding = (status: boolean) => {
