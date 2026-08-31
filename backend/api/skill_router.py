@@ -7,6 +7,9 @@ from backend.models.domain import Skill, SkillPrerequisite
 from backend.services.skill_gap_engine import SkillGapEngine
 from backend.api.auth_router import get_current_profile_id
 
+from backend.api.auth_router import get_current_user_optional
+from backend.models.domain import User
+
 router = APIRouter(prefix="/api/skills", tags=["Skills & Knowledge Graph"])
 
 @router.get("", response_model=List[SkillSchema])

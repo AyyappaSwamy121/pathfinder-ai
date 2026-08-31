@@ -266,13 +266,10 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
               )}
             </div>
 
-            <Link to="/onboarding">
-              <Button size="sm" variant="primary">
-                Build Path
-              </Button>
-            </Link>
-          </div>
-        </header>
+      {/* Main Content Area */}
+      <div className="lg:pl-[250px] flex flex-col flex-1 min-h-screen">
+        {/* Top Header */}
+        <TopHeader onOpenMobileSidebar={() => setMobileOpen(true)} />
 
         {/* Main Content View */}
         <main className="flex-1 max-w-6xl w-full mx-auto px-8 py-8">

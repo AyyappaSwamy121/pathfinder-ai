@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api, AuthResponseData } from '../services/api';
 import { DashboardData, LearningPath, LearnerProfile } from '../types';
+import { useAuth } from './AuthContext';
 
 export interface UserState {
   id: string;

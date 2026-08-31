@@ -10,6 +10,9 @@ from backend.models.domain import Career, CareerSkill, Skill
 from backend.services.simulator_engine import SimulatorEngine
 from backend.api.auth_router import get_current_profile_id
 
+from backend.api.auth_router import get_current_user_optional
+from backend.models.domain import User
+
 router = APIRouter(prefix="/api/careers", tags=["Careers"])
 
 @router.get("", response_model=List[CareerSchema])
@@ -78,6 +81,7 @@ def compare_careers(
     profile_id: str = Depends(get_current_profile_id)
 ):
     """Compare two career targets side by side."""
+    user, profile_id = user_and_pid
     ca = db.query(Career).filter(Career.id == req.career_id_a).first()
     cb = db.query(Career).filter(Career.id == req.career_id_b).first()
     if not ca or not cb:

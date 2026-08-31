@@ -138,7 +138,11 @@ def init_seed_database(db: Session):
         demo_user = User(
             id=DEMO_USER_ID,
             email="alex.demo@pathfinder.ai",
-            name="Alex Morgan"
+            name="Alex Morgan",
+            first_name="Alex",
+            last_name="Morgan",
+            college_name="Stanford University",
+            is_onboarded=True
         )
         db.add(demo_user)
         db.commit()

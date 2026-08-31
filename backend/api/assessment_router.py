@@ -9,6 +9,9 @@ from backend.models.domain import Assessment, Skill
 from backend.services.adaptive_engine import AdaptiveLearningEngine
 from backend.api.auth_router import get_current_profile_id
 
+from backend.api.auth_router import get_current_user_optional
+from backend.models.domain import User
+
 router = APIRouter(tags=["Assessments & Feedback"])
 
 @router.get("/api/assessment/{assessment_id}", response_model=AssessmentDetailSchema)
@@ -46,6 +49,7 @@ def evaluate_assessment(
     profile_id: str = Depends(get_current_profile_id)
 ):
     """Submit assessment answers and receive score, feedback, and adaptive roadmap updates."""
+    user, profile_id = user_and_pid
     res = AdaptiveLearningEngine.process_assessment_result(
         db, profile_id, req.assessment_id, req.answers
     )
@@ -58,6 +62,7 @@ def submit_feedback(
     profile_id: str = Depends(get_current_profile_id)
 ):
     """Submit 5-tier confidence feedback (Struggling, Need Practice, Comfortable, Confident, Too Easy)."""
+    user, profile_id = user_and_pid
     res = AdaptiveLearningEngine.process_feedback(
         db, profile_id, req.skill_id, req.sentiment, req.comment
     )

@@ -10,6 +10,8 @@ from backend.services.skill_gap_engine import SkillGapEngine
 from backend.services.roadmap_engine import RoadmapEngine
 from backend.api.auth_router import get_current_profile_id, get_current_user_id
 
+from backend.api.auth_router import get_current_user_optional
+
 router = APIRouter(prefix="/api/profile", tags=["Profile"])
 
 @router.post("/analyze", response_model=ProfileExtractResponse)
@@ -50,6 +52,9 @@ def update_profile(
     profile.weekly_hours = req.weekly_hours
     profile.timeline_months = req.timeline_months
     profile.learning_preference = req.learning_preference
+
+    if user:
+        user.is_onboarded = True
 
     # Sync skills
     for item in req.skills:

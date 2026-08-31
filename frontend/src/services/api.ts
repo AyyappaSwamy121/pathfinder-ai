@@ -8,7 +8,9 @@ import {
   AssessmentDetail,
   AssessmentEvaluateResponse,
   SimulateCareerResponse,
-  ChatResponse
+  ChatResponse,
+  AuthTokenResponse,
+  AuthUser,
 } from '../types';
 
 const envBase = (import.meta as any).env?.VITE_API_BASE_URL;
@@ -25,6 +27,18 @@ export interface AuthResponseData {
 }
 
 type str = string;
+
+export function getStoredToken(): string | null {
+  return localStorage.getItem('pathfinder_token');
+}
+
+export function setStoredToken(token: string | null) {
+  if (token) {
+    localStorage.setItem('pathfinder_token', token);
+  } else {
+    localStorage.removeItem('pathfinder_token');
+  }
+}
 
 async function fetchJSON<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const token = localStorage.getItem('pathfinder_token');

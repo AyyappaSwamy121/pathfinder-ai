@@ -6,6 +6,9 @@ from backend.models.domain import LearningPath, PathStep, Skill, Career, Resourc
 from backend.services.roadmap_engine import RoadmapEngine
 from backend.api.auth_router import get_current_profile_id
 
+from backend.api.auth_router import get_current_user_optional
+from backend.models.domain import User
+
 router = APIRouter(prefix="/api/paths", tags=["Roadmap"])
 
 @router.get("/current", response_model=LearningPathSchema)
