@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import { LearnerProvider, useLearner } from './context/LearnerContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Navbar } from './components/Navbar';
@@ -40,141 +41,143 @@ export const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <BrowserRouter>
-        <LearnerProvider>
-          <Routes>
-            {/* Public Landing & Auth Routes */}
-            <Route
-              path="/"
-              element={
-                <div className="min-h-screen flex flex-col justify-between bg-[var(--bg)] font-sans text-[var(--text-primary)]">
-                  <Navbar />
-                  <main className="flex-1">
-                    <LandingPage />
-                  </main>
-                  <Footer />
-                </div>
-              }
-            />
-            <Route
-              path="/login"
-              element={
-                <div className="min-h-screen flex flex-col justify-between bg-[var(--bg)] font-sans text-[var(--text-primary)]">
-                  <Navbar />
-                  <main className="flex-1">
-                    <AuthPage />
-                  </main>
-                  <Footer />
-                </div>
-              }
-            />
-            <Route
-              path="/signup"
-              element={
-                <div className="min-h-screen flex flex-col justify-between bg-[var(--bg)] font-sans text-[var(--text-primary)]">
-                  <Navbar />
-                  <main className="flex-1">
-                    <AuthPage />
-                  </main>
-                  <Footer />
-                </div>
-              }
-            />
-            <Route
-              path="/onboarding"
-              element={
-                <div className="min-h-screen flex flex-col justify-between bg-[var(--bg)] font-sans text-[var(--text-primary)]">
-                  <Navbar />
-                  <main className="flex-1">
-                    <OnboardingPage />
-                  </main>
-                  <Footer />
-                </div>
-              }
-            />
+        <AuthProvider>
+          <LearnerProvider>
+            <Routes>
+              {/* Public Landing & Auth Routes */}
+              <Route
+                path="/"
+                element={
+                  <div className="min-h-screen flex flex-col justify-between bg-[var(--bg)] font-sans text-[var(--text-primary)]">
+                    <Navbar />
+                    <main className="flex-1">
+                      <LandingPage />
+                    </main>
+                    <Footer />
+                  </div>
+                }
+              />
+              <Route
+                path="/login"
+                element={
+                  <div className="min-h-screen flex flex-col justify-between bg-[var(--bg)] font-sans text-[var(--text-primary)]">
+                    <Navbar />
+                    <main className="flex-1">
+                      <AuthPage />
+                    </main>
+                    <Footer />
+                  </div>
+                }
+              />
+              <Route
+                path="/signup"
+                element={
+                  <div className="min-h-screen flex flex-col justify-between bg-[var(--bg)] font-sans text-[var(--text-primary)]">
+                    <Navbar />
+                    <main className="flex-1">
+                      <AuthPage />
+                    </main>
+                    <Footer />
+                  </div>
+                }
+              />
+              <Route
+                path="/onboarding"
+                element={
+                  <div className="min-h-screen flex flex-col justify-between bg-[var(--bg)] font-sans text-[var(--text-primary)]">
+                    <Navbar />
+                    <main className="flex-1">
+                      <OnboardingPage />
+                    </main>
+                    <Footer />
+                  </div>
+                }
+              />
 
-            {/* Internal Workspace Routes wrapped in ProtectedRoute & AppShell */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <DashboardPage />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/roadmap"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <RoadmapPage />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/skills"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <SkillGraphPage />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/careers"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <CareersPage />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/assessment"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <AssessmentPage />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/copilot"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <CopilotPage />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/simulator"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <WhatIfSimulatorPage />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/architecture"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <ArchitecturePage />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </LearnerProvider>
+              {/* Internal Workspace Routes wrapped in ProtectedRoute & AppShell */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <AppShell>
+                      <DashboardPage />
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/roadmap"
+                element={
+                  <ProtectedRoute>
+                    <AppShell>
+                      <RoadmapPage />
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/skills"
+                element={
+                  <ProtectedRoute>
+                    <AppShell>
+                      <SkillGraphPage />
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/careers"
+                element={
+                  <ProtectedRoute>
+                    <AppShell>
+                      <CareersPage />
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/assessment"
+                element={
+                  <ProtectedRoute>
+                    <AppShell>
+                      <AssessmentPage />
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/copilot"
+                element={
+                  <ProtectedRoute>
+                    <AppShell>
+                      <CopilotPage />
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/simulator"
+                element={
+                  <ProtectedRoute>
+                    <AppShell>
+                      <WhatIfSimulatorPage />
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/architecture"
+                element={
+                  <ProtectedRoute>
+                    <AppShell>
+                      <ArchitecturePage />
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </LearnerProvider>
+        </AuthProvider>
       </BrowserRouter>
     </ErrorBoundary>
   );

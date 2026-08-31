@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, LayoutDashboard, User } from 'lucide-react';
+import { ArrowRight, LayoutDashboard, User, Compass } from 'lucide-react';
 import { Button } from './ui/Button';
 import { useLearner } from '../context/LearnerContext';
 
