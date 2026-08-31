@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useLearner } from '../context/LearnerContext';
-import { ShieldCheck, Eye, EyeOff, Loader2, ArrowRight, CheckCircle2, UserCheck } from 'lucide-react';
+import { Eye, EyeOff, Loader2, ArrowRight } from 'lucide-react';
 
 export const AuthPage: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { login, signup, loadPresetProfile, isAuthenticated } = useLearner();
+  const { login, signup, loadPresetProfile } = useLearner();
 
   const [isLogin, setIsLogin] = useState<boolean>(true);
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -64,7 +63,6 @@ export const AuthPage: React.FC = () => {
           email,
           password,
         });
-        // Direct first-time users to onboarding
         navigate('/onboarding');
       } catch (err: any) {
         setErrorMsg(err.message || 'Signup failed. Please try again.');
@@ -87,11 +85,11 @@ export const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 bg-background">
-      <div className="max-w-md w-full bg-surface border border-slate-200 rounded-lg p-8 shadow-subtle">
+    <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 bg-[#F8FAFC]">
+      <div className="max-w-md w-full bg-white border border-slate-200 rounded-lg p-8 shadow-sm">
         {/* Brand Logo & Subtitle */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-10 h-10 rounded-md bg-primary text-white font-extrabold text-sm mb-3">
+          <div className="inline-flex items-center justify-center w-10 h-10 rounded-md bg-[#4338CA] text-white font-extrabold text-sm mb-3">
             P
           </div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">
@@ -110,7 +108,7 @@ export const AuthPage: React.FC = () => {
               setErrorMsg(null);
             }}
             className={`flex-1 py-2.5 text-center border-b-2 transition-colors ${
-              isLogin ? 'border-primary text-primary font-bold' : 'border-transparent text-slate-500 hover:text-slate-900'
+              isLogin ? 'border-[#4338CA] text-[#4338CA] font-bold' : 'border-transparent text-slate-500 hover:text-slate-900'
             }`}
           >
             Sign In
@@ -121,7 +119,7 @@ export const AuthPage: React.FC = () => {
               setErrorMsg(null);
             }}
             className={`flex-1 py-2.5 text-center border-b-2 transition-colors ${
-              !isLogin ? 'border-primary text-primary font-bold' : 'border-transparent text-slate-500 hover:text-slate-900'
+              !isLogin ? 'border-[#4338CA] text-[#4338CA] font-bold' : 'border-transparent text-slate-500 hover:text-slate-900'
             }`}
           >
             Create Student Account
@@ -150,7 +148,7 @@ export const AuthPage: React.FC = () => {
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     placeholder="Alex"
-                    className="w-full p-2.5 rounded-md border border-slate-300 text-xs text-slate-900 focus:ring-2 focus:ring-primary focus:outline-none"
+                    className="w-full p-2.5 rounded-md border border-slate-300 text-xs text-slate-900 focus:ring-2 focus:ring-[#4338CA] focus:outline-none"
                   />
                 </div>
                 <div>
@@ -163,7 +161,7 @@ export const AuthPage: React.FC = () => {
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     placeholder="Morgan"
-                    className="w-full p-2.5 rounded-md border border-slate-300 text-xs text-slate-900 focus:ring-2 focus:ring-primary focus:outline-none"
+                    className="w-full p-2.5 rounded-md border border-slate-300 text-xs text-slate-900 focus:ring-2 focus:ring-[#4338CA] focus:outline-none"
                   />
                 </div>
               </div>
@@ -178,7 +176,7 @@ export const AuthPage: React.FC = () => {
                   value={collegeName}
                   onChange={(e) => setCollegeName(e.target.value)}
                   placeholder="Indian Institute of Technology / HCL Amplify"
-                  className="w-full p-2.5 rounded-md border border-slate-300 text-xs text-slate-900 focus:ring-2 focus:ring-primary focus:outline-none"
+                  className="w-full p-2.5 rounded-md border border-slate-300 text-xs text-slate-900 focus:ring-2 focus:ring-[#4338CA] focus:outline-none"
                 />
               </div>
             </>
@@ -194,7 +192,7 @@ export const AuthPage: React.FC = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="student@university.edu"
-              className="w-full p-2.5 rounded-md border border-slate-300 text-xs text-slate-900 focus:ring-2 focus:ring-primary focus:outline-none"
+              className="w-full p-2.5 rounded-md border border-slate-300 text-xs text-slate-900 focus:ring-2 focus:ring-[#4338CA] focus:outline-none"
             />
           </div>
 
@@ -209,7 +207,7 @@ export const AuthPage: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full p-2.5 pr-10 rounded-md border border-slate-300 text-xs text-slate-900 focus:ring-2 focus:ring-primary focus:outline-none"
+                className="w-full p-2.5 pr-10 rounded-md border border-slate-300 text-xs text-slate-900 focus:ring-2 focus:ring-[#4338CA] focus:outline-none"
               />
               <button
                 type="button"
@@ -232,7 +230,7 @@ export const AuthPage: React.FC = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full p-2.5 rounded-md border border-slate-300 text-xs text-slate-900 focus:ring-2 focus:ring-primary focus:outline-none"
+                className="w-full p-2.5 rounded-md border border-slate-300 text-xs text-slate-900 focus:ring-2 focus:ring-[#4338CA] focus:outline-none"
               />
             </div>
           )}
@@ -244,7 +242,7 @@ export const AuthPage: React.FC = () => {
                   type="checkbox"
                   checked={rememberSession}
                   onChange={(e) => setRememberSession(e.target.checked)}
-                  className="rounded border-slate-300 text-primary focus:ring-primary"
+                  className="rounded border-slate-300 text-[#4338CA] focus:ring-[#4338CA]"
                 />
                 <span>Remember session</span>
               </label>
@@ -254,7 +252,7 @@ export const AuthPage: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-2.5 rounded-md text-xs transition-colors flex items-center justify-center space-x-2 shadow-subtle disabled:opacity-50 mt-2"
+            className="w-full bg-[#4338CA] hover:bg-[#3730A3] text-white font-semibold py-3 px-4 rounded-md text-xs transition-colors flex items-center justify-center space-x-2 shadow-sm disabled:opacity-50 mt-4 cursor-pointer"
           >
             {loading ? (
               <>
@@ -279,21 +277,21 @@ export const AuthPage: React.FC = () => {
           <div className="grid grid-cols-3 gap-2">
             <button
               onClick={() => handleDemoPreset('alex')}
-              className="p-2 rounded bg-slate-50 border border-slate-200 hover:border-slate-300 text-[11px] text-slate-800 font-semibold transition-colors flex flex-col items-center text-center"
+              className="p-2 rounded bg-slate-50 border border-slate-200 hover:border-slate-300 text-[11px] text-slate-800 font-semibold transition-colors flex flex-col items-center text-center cursor-pointer"
             >
               <span>Alex</span>
               <span className="text-[9px] text-slate-500 font-normal">AI Engineer</span>
             </button>
             <button
               onClick={() => handleDemoPreset('jordan')}
-              className="p-2 rounded bg-slate-50 border border-slate-200 hover:border-slate-300 text-[11px] text-slate-800 font-semibold transition-colors flex flex-col items-center text-center"
+              className="p-2 rounded bg-slate-50 border border-slate-200 hover:border-slate-300 text-[11px] text-slate-800 font-semibold transition-colors flex flex-col items-center text-center cursor-pointer"
             >
               <span>Jordan</span>
               <span className="text-[9px] text-slate-500 font-normal">Data Analyst</span>
             </button>
             <button
               onClick={() => handleDemoPreset('devon')}
-              className="p-2 rounded bg-slate-50 border border-slate-200 hover:border-slate-300 text-[11px] text-slate-800 font-semibold transition-colors flex flex-col items-center text-center"
+              className="p-2 rounded bg-slate-50 border border-slate-200 hover:border-slate-300 text-[11px] text-slate-800 font-semibold transition-colors flex flex-col items-center text-center cursor-pointer"
             >
               <span>Devon</span>
               <span className="text-[9px] text-slate-500 font-normal">Full Stack</span>
