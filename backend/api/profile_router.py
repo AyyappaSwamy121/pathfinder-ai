@@ -53,8 +53,7 @@ def update_profile(
     profile.timeline_months = req.timeline_months
     profile.learning_preference = req.learning_preference
 
-    if user:
-        user.is_onboarded = True
+
 
     # Sync skills
     for item in req.skills:

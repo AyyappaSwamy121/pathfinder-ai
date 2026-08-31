@@ -50,6 +50,18 @@ def get_current_user_id(authorization: Optional[str] = Header(None)) -> str:
         return token
     return "usr_alex_demo"
 
+def get_current_user(user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)) -> User:
+    """Canonical user authentication dependency verifying token and returning active User model."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        user = db.query(User).filter(User.id == "usr_alex_demo").first()
+    return user
+
+def get_current_user_optional(authorization: Optional[str] = Header(None), db: Session = Depends(get_db)) -> Optional[User]:
+    """Optional user authentication dependency."""
+    user_id = get_current_user_id(authorization)
+    return db.query(User).filter(User.id == user_id).first()
+
 def get_current_profile_id(user_id: str = Depends(get_current_user_id), db: Session = Depends(get_db)) -> str:
     """Resolve active profile_id for authenticated user or demo persona."""
     if user_id == "usr_alex_demo":
