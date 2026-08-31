@@ -11,6 +11,11 @@ class User(Base):
     id = Column(String, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
     name = Column(String, nullable=False)
+    first_name = Column(String, nullable=True)
+    last_name = Column(String, nullable=True)
+    college_name = Column(String, nullable=True)
+    password_hash = Column(String, nullable=True)
+    is_onboarded = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     profile = relationship("LearnerProfile", back_populates="user", uselist=False)

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLearner } from '../context/LearnerContext';
+import { useAuth } from '../context/AuthContext';
 import { ReadinessGauge } from '../components/ReadinessGauge';
 import { NextBestActionCard } from '../components/NextBestActionCard';
 import { SkillGapBadge } from '../components/SkillGapBadge';
@@ -7,7 +8,7 @@ import { WhyThisModal } from '../components/WhyThisModal';
 import { AssessmentModal } from '../components/AssessmentModal';
 import { FeedbackModal } from '../components/FeedbackModal';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronRight, Sparkles } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
@@ -15,11 +16,14 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'rec
 
 export const DashboardPage: React.FC = () => {
   const { dashboard, loading, refreshState } = useLearner();
+  const { user } = useAuth();
 
   const [whyThisOpen, setWhyThisOpen] = useState(false);
   const [assessmentOpen, setAssessmentOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [selectedSkillForFeedback, setSelectedSkillForFeedback] = useState<string>('s_model_eval');
+
+  const firstName = user?.first_name || 'Alex';
 
   if (loading || !dashboard) {
     return (
@@ -48,7 +52,7 @@ export const DashboardPage: React.FC = () => {
       <Card className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-[var(--text-primary)]">
-            Good morning, Alex
+            Welcome back, {firstName}
           </h2>
           <div className="flex items-center gap-2 mt-1 text-xs text-[var(--text-secondary)]">
             <span className="font-semibold text-[var(--text-primary)]">{dashboard.target_career.title} Path</span>

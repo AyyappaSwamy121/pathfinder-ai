@@ -9,6 +9,9 @@ from backend.models.domain import Assessment, Skill
 from backend.services.adaptive_engine import AdaptiveLearningEngine
 from backend.seed.seed_data import DEMO_PROFILE_ID
 
+from backend.api.auth_router import get_current_user_optional
+from backend.models.domain import User
+
 router = APIRouter(tags=["Assessments & Feedback"])
 
 @router.get("/api/assessment/{assessment_id}", response_model=AssessmentDetailSchema)
@@ -41,17 +44,27 @@ def get_assessment(assessment_id: str, db: Session = Depends(get_db)):
     )
 
 @router.post("/api/assessment/evaluate", response_model=AssessmentEvaluateResponse)
-def evaluate_assessment(req: AssessmentEvaluateRequest, db: Session = Depends(get_db)):
+def evaluate_assessment(
+    req: AssessmentEvaluateRequest,
+    db: Session = Depends(get_db),
+    user_and_pid: tuple[User, str] = Depends(get_current_user_optional)
+):
     """Submit assessment answers and receive score, feedback, and adaptive roadmap updates."""
+    user, profile_id = user_and_pid
     res = AdaptiveLearningEngine.process_assessment_result(
-        db, DEMO_PROFILE_ID, req.assessment_id, req.answers
+        db, profile_id, req.assessment_id, req.answers
     )
     return res
 
 @router.post("/api/feedback", response_model=FeedbackSubmitResponse)
-def submit_feedback(req: FeedbackSubmitRequest, db: Session = Depends(get_db)):
+def submit_feedback(
+    req: FeedbackSubmitRequest,
+    db: Session = Depends(get_db),
+    user_and_pid: tuple[User, str] = Depends(get_current_user_optional)
+):
     """Submit 5-tier confidence feedback (Struggling, Need Practice, Comfortable, Confident, Too Easy)."""
+    user, profile_id = user_and_pid
     res = AdaptiveLearningEngine.process_feedback(
-        db, DEMO_PROFILE_ID, req.skill_id, req.sentiment, req.comment
+        db, profile_id, req.skill_id, req.sentiment, req.comment
     )
     return res

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { DashboardData, LearningPath, LearnerProfile } from '../types';
+import { useAuth } from './AuthContext';
 
 interface LearnerContextType {
   profile: LearnerProfile | null;
@@ -17,6 +18,7 @@ interface LearnerContextType {
 const LearnerContext = createContext<LearnerContextType | undefined>(undefined);
 
 export const LearnerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { token, isAuthenticated } = useAuth();
   const [profile, setProfile] = useState<LearnerProfile | null>(null);
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [activePath, setActivePath] = useState<LearningPath | null>(null);
@@ -43,7 +45,8 @@ export const LearnerProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   useEffect(() => {
     refreshState();
-  }, []);
+  }, [token]);
+
 
   const toggleJudgeMode = () => setJudgeMode(!judgeMode);
 
