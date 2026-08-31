@@ -11,7 +11,8 @@ import {
   ChatResponse
 } from '../types';
 
-const API_BASE = '/api';
+const envBase = (import.meta as any).env?.VITE_API_BASE_URL;
+const API_BASE = envBase ? `${envBase.replace(/\/$/, '')}/api` : '/api';
 
 export interface AuthResponseData {
   token: str;
@@ -46,9 +47,15 @@ async function fetchJSON<T>(endpoint: string, options?: RequestInit): Promise<T>
     let parsedMsg = errorText;
     try {
       const errObj = JSON.parse(errorText);
-      parsedMsg = errObj.detail || errObj.message || errorText;
+      if (typeof errObj.detail === 'string') {
+        parsedMsg = errObj.detail;
+      } else if (Array.isArray(errObj.detail)) {
+        parsedMsg = errObj.detail.map((e: any) => e.msg || JSON.stringify(e)).join(', ');
+      } else if (errObj.message) {
+        parsedMsg = errObj.message;
+      }
     } catch (_) {}
-    throw new Error(parsedMsg);
+    throw new Error(parsedMsg || 'Request failed');
   }
 
   return res.json();

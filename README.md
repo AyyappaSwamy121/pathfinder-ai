@@ -283,6 +283,50 @@ Frontend will start on `http://localhost:3000`.
 
 ---
 
+## Production Deployment Architecture
+
+```text
+Vercel (React / Vite Frontend)
+  ↓ HTTP / REST API Calls
+Railway / Render (FastAPI Backend Server)
+  ↓ DB & Auth
+Supabase PostgreSQL & Supabase Auth
+  +
+Gemini / OpenAI API Services
+```
+
+### 1. Database & Auth Setup (Supabase)
+1. Create a new project on [Supabase](https://supabase.com).
+2. Open the **SQL Editor** in your Supabase Dashboard.
+3. Paste and run the contents of [`supabase/migrations/001_pathfinder_schema.sql`](file:///d:/HCL%20AMPLIFIED/supabase/migrations/001_pathfinder_schema.sql).
+4. Copy your Supabase PostgreSQL connection string from **Project Settings ──► Database ──► Connection String (Transaction Pooler)**.
+
+### 2. Backend Deployment (Railway / Render)
+1. Connect your repository to Railway or Render.
+2. Set the root directory to project root `.` or `backend/`.
+3. Set the start command:
+   ```bash
+   uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+   ```
+4. Configure environment variables on Railway/Render:
+   - `DATABASE_URL` = `postgresql://postgres.xxx:password@aws-0-us-east-1.pooler.supabase.com:6543/postgres`
+   - `OPENAI_API_KEY` = `your_openai_api_key`
+   - `GEMINI_API_KEY` = `your_gemini_api_key`
+   - `ALLOWED_ORIGINS` = `https://your-app.vercel.app`
+
+### 3. Frontend Deployment (Vercel)
+1. Import the repository into [Vercel](https://vercel.com).
+2. Set **Root Directory** to `frontend`.
+3. Framework Preset: **Vite**.
+4. Build Command: `npm run build`.
+5. Output Directory: `dist`.
+6. Configure environment variables on Vercel:
+   - `VITE_API_BASE_URL` = `https://your-backend.up.railway.app`
+   - `VITE_SUPABASE_URL` = `https://your-project.supabase.co`
+   - `VITE_SUPABASE_ANON_KEY` = `your_supabase_anon_key`
+
+---
+
 ## Verification & Testing
 
 ### Backend API Verification Test
@@ -314,3 +358,4 @@ For a 3–5 minute hackathon demonstration, follow the exact guide in [docs/demo
 - **Real-Time Labor Market Integration**: Ingest real-time job posting APIs (LinkedIn, Indeed) to auto-update career skill weights.
 - **GitHub Repository Analysis**: Automatically parse learner GitHub repositories to verify project evidence.
 - **Institutional Analytics Dashboard**: Provide university and enterprise administrators with cohort skill gap visualizations.
+
