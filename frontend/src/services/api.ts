@@ -15,8 +15,8 @@ import {
 } from '../types';
 
 const env = (import.meta as any).env || {};
-const SUPABASE_URL = env.VITE_SUPABASE_URL || 'https://ftejyiygyykxwiwzyjvk.supabase.co';
-const SUPABASE_ANON_KEY = env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dummy_anon_key';
+const SUPABASE_URL = env.VITE_SUPABASE_URL || env.SUPABASE_URL || 'https://ftejyiygyykxwiwzyjvk.supabase.co';
+const SUPABASE_ANON_KEY = env.VITE_SUPABASE_ANON_KEY || env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dummy_anon_key';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
@@ -157,6 +157,9 @@ export const api = {
     });
 
     if (error) {
+      if (error.message.includes('Invalid API key') || error.message.includes('apikey')) {
+        throw new Error('Supabase Anon Key is missing or invalid in Vercel. Please set VITE_SUPABASE_ANON_KEY in Vercel Environment Variables.');
+      }
       throw new Error(error.message || 'Signup failed. Please try again.');
     }
 
@@ -195,6 +198,9 @@ export const api = {
     });
 
     if (error) {
+      if (error.message.includes('Invalid API key') || error.message.includes('apikey')) {
+        throw new Error('Supabase Anon Key is missing or invalid in Vercel. Please set VITE_SUPABASE_ANON_KEY in Vercel Environment Variables.');
+      }
       throw new Error(error.message || 'Invalid email or password.');
     }
 

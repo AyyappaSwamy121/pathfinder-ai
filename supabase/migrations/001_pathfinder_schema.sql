@@ -1,13 +1,13 @@
 -- ============================================================================
 -- PATHFINDER AI — SUPABASE POSTGRESQL PRODUCTION DATABASE SCHEMA
 -- Migration Version: 001_pathfinder_schema.sql
--- Description: Clean, idempotent schema migration for Supabase SQL Editor
+-- Description: Clean, fail-safe schema migration for Supabase SQL Editor
 -- ============================================================================
 
 -- Enable UUID Extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Drop legacy table constraints if present to eliminate UUID vs VARCHAR column mismatches
+-- Drop legacy table constraints if present
 DROP TABLE IF EXISTS public.chat_messages CASCADE;
 DROP TABLE IF EXISTS public.feedback CASCADE;
 DROP TABLE IF EXISTS public.assessment_results CASCADE;
@@ -43,6 +43,15 @@ CREATE TABLE public.careers (
     icon VARCHAR(100) DEFAULT 'Briefcase',
     category VARCHAR(100) DEFAULT 'Engineering'
 );
+
+-- Seed Initial Career Paths
+INSERT INTO public.careers (id, title, description, icon, category)
+VALUES
+    ('c_ai_engineer', 'AI Engineer', 'Design, train, and deploy production-grade Artificial Intelligence and Machine Learning models.', 'Cpu', 'Engineering'),
+    ('c_data_scientist', 'Data Scientist', 'Extract statistical insights, build predictive models, and perform exploratory data analysis.', 'LineChart', 'Analytics'),
+    ('c_fullstack_dev', 'Full Stack Developer', 'Build modern frontend React applications and scalable web microservices.', 'Code', 'Engineering'),
+    ('c_data_analyst', 'Data Analyst', 'Transform complex business datasets into intuitive dashboards and visual reporting.', 'BarChart', 'Analytics')
+ON CONFLICT (id) DO NOTHING;
 
 -- 3. Learner Profiles Table (Linked to Supabase Auth auth.users)
 CREATE TABLE public.learner_profiles (
@@ -198,7 +207,7 @@ CREATE TABLE public.chat_messages (
 );
 
 -- ============================================================================
--- AUTO-PROFILE TRIGGER FOR SUPABASE AUTH SIGNUP
+-- FAIL-SAFE AUTO-PROFILE TRIGGER FOR SUPABASE AUTH SIGNUP
 -- ============================================================================
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
@@ -225,6 +234,9 @@ BEGIN
     )
     ON CONFLICT (id) DO NOTHING;
 
+    RETURN NEW;
+EXCEPTION WHEN OTHERS THEN
+    -- Prevent signup failure if secondary learner profile creation encounters any non-fatal issue
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
