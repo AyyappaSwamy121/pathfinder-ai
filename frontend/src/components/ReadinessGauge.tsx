@@ -2,6 +2,7 @@ import React from 'react';
 import { Card } from './ui/Card';
 import { Badge } from './ui/Badge';
 import { ShieldCheck, Info } from 'lucide-react';
+import { AnimatedNumber, AnimatedProgress } from './motion/MotionPrimitives';
 
 interface ReadinessGaugeProps {
   score: number;
@@ -19,7 +20,7 @@ export const ReadinessGauge: React.FC<ReadinessGaugeProps> = ({
   priorityGaps = ['Deep Learning', 'MLOps'],
 }) => {
   return (
-    <Card className="flex flex-col justify-between h-full">
+    <Card className="flex flex-col justify-between h-full transition-all duration-200 hover:border-slate-300">
       <div>
         <div className="flex items-center justify-between mb-2">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
@@ -36,16 +37,13 @@ export const ReadinessGauge: React.FC<ReadinessGaugeProps> = ({
             {careerTitle}
           </h4>
           <div className="text-xl font-extrabold font-mono text-[var(--text-primary)]">
-            {Math.round(score)} <span className="text-xs font-normal text-[var(--text-tertiary)]">/ 100</span>
+            <AnimatedNumber value={score} duration={0.9} /> <span className="text-xs font-normal text-[var(--text-tertiary)]">/ 100</span>
           </div>
         </div>
 
-        {/* Progress Bar */}
-        <div className="w-full bg-[var(--surface-sunken)] h-2 rounded-[var(--radius-pill)] overflow-hidden mb-6">
-          <div
-            className="bg-[var(--brand)] h-full rounded-[var(--radius-pill)] transition-all duration-500"
-            style={{ width: `${Math.max(5, Math.min(100, score))}%` }}
-          />
+        {/* Animated Progress Bar */}
+        <div className="mb-6">
+          <AnimatedProgress value={score} className="h-2.5" />
         </div>
 
         {/* Breakdown List */}

@@ -6,6 +6,7 @@ import {
 import { useLearner } from '../../context/LearnerContext';
 import { useAuth } from '../../context/AuthContext';
 import { TopHeader } from '../TopHeader';
+import { PageTransition } from '../motion/MotionPrimitives';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -201,7 +202,9 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
 
         {/* Main Content View */}
         <main className="flex-1 max-w-6xl w-full mx-auto px-8 py-8">
-          {children}
+          <PageTransition key={location.pathname}>
+            {children}
+          </PageTransition>
         </main>
       </div>
     </div>

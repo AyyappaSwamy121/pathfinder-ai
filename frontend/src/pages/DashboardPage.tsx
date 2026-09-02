@@ -13,6 +13,15 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts';
+import {
+  StaggerContainer,
+  StaggerItem,
+  AnimatedNumber,
+  MetricSkeleton,
+  CardSkeleton,
+  TRANSITION_EASE,
+} from '../components/motion/MotionPrimitives';
+import { motion } from 'framer-motion';
 
 export const DashboardPage: React.FC = () => {
   const { dashboard, loading, refreshState, user: learnerUser, isDemoMode } = useLearner();
@@ -29,12 +38,16 @@ export const DashboardPage: React.FC = () => {
 
   if (loading || !dashboard) {
     return (
-      <div className="space-y-6 animate-pulse">
-        <div className="h-20 bg-[var(--surface-sunken)] rounded-[var(--radius-md)]" />
+      <div className="space-y-6">
+        <CardSkeleton className="h-24" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-24 bg-[var(--surface-sunken)] rounded-[var(--radius-md)]" />
+            <MetricSkeleton key={i} />
           ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <CardSkeleton className="lg:col-span-2 h-64" />
+          <CardSkeleton className="lg:col-span-1 h-64" />
         </div>
       </div>
     );
@@ -45,6 +58,9 @@ export const DashboardPage: React.FC = () => {
   const masteredSkills = dashboard.skill_gaps?.mastered || [];
   const developingSkills = dashboard.skill_gaps?.developing || [];
   const missingSkills = dashboard.skill_gaps?.missing || [];
+  const milestonesCompleted = dashboard.milestones_completed || 0;
+  const milestonesTotal = dashboard.milestones_total || 15;
+  const pathCompletionPct = Math.round((milestonesCompleted / Math.max(1, milestonesTotal)) * 100);
 
   // Growth Analytics Data
   const growthData = [
@@ -57,81 +73,122 @@ export const DashboardPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <Card className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold text-[var(--text-primary)]">
-            Welcome back, {firstName}
-          </h2>
-          <div className="flex items-center gap-2 mt-1 text-xs text-[var(--text-secondary)]">
-            <span className="font-semibold text-[var(--text-primary)]">{targetTitle} Path</span>
-            <span>·</span>
-            <span className="font-mono text-[var(--brand)] font-bold">{readinessScore}% Readiness</span>
-            <span>·</span>
-            <span>{dashboard.milestones_completed || 0} of {dashboard.milestones_total || 15} milestones completed</span>
-          </div>
-        </div>
-
-        <Link to="/roadmap">
-          <Button size="sm" variant="primary">
-            <span>Continue Your Path</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Button>
-        </Link>
-      </Card>
-
-      {/* Row 1 Metrics Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-4">
-          <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-1">
-            Career Readiness
-          </div>
-          <div className="flex items-baseline justify-between">
-            <div className="text-2xl font-extrabold text-[var(--text-primary)] font-mono">
-              {readinessScore}%
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: TRANSITION_EASE }}
+      >
+        <Card className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-slate-200/80 shadow-xs hover:border-slate-300 transition-colors">
+          <div>
+            <h2 className="text-xl font-bold text-[var(--text-primary)]">
+              Welcome back, {firstName}
+            </h2>
+            <div className="flex items-center gap-2 mt-1 text-xs text-[var(--text-secondary)]">
+              <span className="font-semibold text-[var(--text-primary)]">{targetTitle} Path</span>
+              <span>·</span>
+              <span className="font-mono text-[var(--brand)] font-bold">
+                <AnimatedNumber value={readinessScore} suffix="% Readiness" />
+              </span>
+              <span>·</span>
+              <span>{milestonesCompleted} of {milestonesTotal} milestones completed</span>
             </div>
-            <Badge tone="success">+12% month</Badge>
           </div>
-        </Card>
 
-        <Card className="p-4">
-          <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-1">
-            Skills Mastered
-          </div>
-          <div className="flex items-baseline justify-between">
-            <div className="text-2xl font-extrabold text-[var(--text-primary)] font-mono">
-              {masteredSkills.length} <span className="text-xs text-[var(--text-tertiary)] font-normal">/ {dashboard.milestones_total || 15}</span>
-            </div>
-            <Badge tone="neutral">Verified</Badge>
-          </div>
+          <Link to="/roadmap">
+            <Button size="sm" variant="primary">
+              <span>Continue Your Path</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Button>
+          </Link>
         </Card>
+      </motion.div>
 
-        <Card className="p-4">
-          <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-1">
-            Path Completion
-          </div>
-          <div className="flex items-baseline justify-between">
-            <div className="text-2xl font-extrabold text-[var(--text-primary)] font-mono">
-              {Math.round(((dashboard.milestones_completed || 0) / Math.max(1, dashboard.milestones_total || 15)) * 100)}%
-            </div>
-            <Badge tone="brand">Phase 2</Badge>
-          </div>
-        </Card>
+      {/* Row 1 Metrics Summary Cards (Staggered Animation) */}
+      <StaggerContainer staggerDelay={0.07} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StaggerItem>
+          <motion.div
+            whileHover={{ y: -2, transition: { duration: 0.18, ease: TRANSITION_EASE } }}
+            className="h-full"
+          >
+            <Card className="p-4 h-full flex flex-col justify-between hover:border-slate-300 transition-colors">
+              <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-1">
+                Career Readiness
+              </div>
+              <div className="flex items-baseline justify-between">
+                <div className="text-2xl font-extrabold text-[var(--text-primary)] font-mono">
+                  <AnimatedNumber value={readinessScore} suffix="%" />
+                </div>
+                <Badge tone="success">+12% month</Badge>
+              </div>
+            </Card>
+          </motion.div>
+        </StaggerItem>
 
-        <Card className="p-4">
-          <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-1">
-            Weekly Hours Focus
-          </div>
-          <div className="flex items-baseline justify-between">
-            <div className="text-2xl font-extrabold text-[var(--text-primary)] font-mono">
-              3.5 <span className="text-xs text-[var(--text-tertiary)] font-normal">/ 8.0 hrs</span>
-            </div>
-            <Badge tone="neutral">On Track</Badge>
-          </div>
-        </Card>
-      </div>
+        <StaggerItem>
+          <motion.div
+            whileHover={{ y: -2, transition: { duration: 0.18, ease: TRANSITION_EASE } }}
+            className="h-full"
+          >
+            <Card className="p-4 h-full flex flex-col justify-between hover:border-slate-300 transition-colors">
+              <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-1">
+                Skills Mastered
+              </div>
+              <div className="flex items-baseline justify-between">
+                <div className="text-2xl font-extrabold text-[var(--text-primary)] font-mono">
+                  <AnimatedNumber value={masteredSkills.length} /> <span className="text-xs text-[var(--text-tertiary)] font-normal">/ {milestonesTotal}</span>
+                </div>
+                <Badge tone="neutral">Verified</Badge>
+              </div>
+            </Card>
+          </motion.div>
+        </StaggerItem>
+
+        <StaggerItem>
+          <motion.div
+            whileHover={{ y: -2, transition: { duration: 0.18, ease: TRANSITION_EASE } }}
+            className="h-full"
+          >
+            <Card className="p-4 h-full flex flex-col justify-between hover:border-slate-300 transition-colors">
+              <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-1">
+                Path Completion
+              </div>
+              <div className="flex items-baseline justify-between">
+                <div className="text-2xl font-extrabold text-[var(--text-primary)] font-mono">
+                  <AnimatedNumber value={pathCompletionPct} suffix="%" />
+                </div>
+                <Badge tone="brand">Phase 2</Badge>
+              </div>
+            </Card>
+          </motion.div>
+        </StaggerItem>
+
+        <StaggerItem>
+          <motion.div
+            whileHover={{ y: -2, transition: { duration: 0.18, ease: TRANSITION_EASE } }}
+            className="h-full"
+          >
+            <Card className="p-4 h-full flex flex-col justify-between hover:border-slate-300 transition-colors">
+              <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-1">
+                Weekly Hours Focus
+              </div>
+              <div className="flex items-baseline justify-between">
+                <div className="text-2xl font-extrabold text-[var(--text-primary)] font-mono">
+                  3.5 <span className="text-xs text-[var(--text-tertiary)] font-normal">/ 8.0 hrs</span>
+                </div>
+                <Badge tone="neutral">On Track</Badge>
+              </div>
+            </Card>
+          </motion.div>
+        </StaggerItem>
+      </StaggerContainer>
 
       {/* Main Grid: Next Best Action spotlight + Readiness Gauge */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.12, ease: TRANSITION_EASE }}
+        className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+      >
         {/* Next Best Action Card Spotlight */}
         <div className="lg:col-span-2">
           {dashboard.next_best_action && (
@@ -153,12 +210,17 @@ export const DashboardPage: React.FC = () => {
             priorityGaps={missingSkills.map((s) => s.name).slice(0, 2)}
           />
         </div>
-      </div>
+      </motion.div>
 
       {/* Skill Growth Analytics & Skill Gaps Overview */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.18, ease: TRANSITION_EASE }}
+        className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+      >
         {/* Growth Curve Chart */}
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 hover:border-slate-300 transition-colors">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-sm font-bold text-[var(--text-primary)]">
@@ -192,7 +254,7 @@ export const DashboardPage: React.FC = () => {
         </Card>
 
         {/* Skill Gap Distribution */}
-        <Card className="flex flex-col justify-between">
+        <Card className="flex flex-col justify-between hover:border-slate-300 transition-colors">
           <div>
             <h3 className="text-sm font-bold text-[var(--text-primary)] mb-1">
               Active Skill Gap Status
@@ -242,7 +304,7 @@ export const DashboardPage: React.FC = () => {
             </Link>
           </div>
         </Card>
-      </div>
+      </motion.div>
 
       {/* Modals */}
       {dashboard.next_best_action && (

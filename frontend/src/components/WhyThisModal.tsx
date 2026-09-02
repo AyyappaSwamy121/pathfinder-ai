@@ -2,6 +2,7 @@ import React from 'react';
 import { X, HelpCircle, CheckCircle, ShieldCheck } from 'lucide-react';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
+import { ModalTransition } from './motion/MotionPrimitives';
 
 interface WhyThisModalProps {
   isOpen: boolean;
@@ -18,14 +19,12 @@ export const WhyThisModal: React.FC<WhyThisModalProps> = ({
   reason,
   careerTitle = 'AI Engineer',
 }) => {
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius-lg)] max-w-lg w-full p-6 shadow-md relative">
+    <ModalTransition isOpen={isOpen} onClose={onClose} maxWidth="max-w-lg">
+      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius-lg)] p-6 shadow-lg relative">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] p-1"
+          className="absolute top-4 right-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] p-1 rounded hover:bg-[var(--surface-sunken)] transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
@@ -79,6 +78,6 @@ export const WhyThisModal: React.FC<WhyThisModalProps> = ({
           </Button>
         </div>
       </div>
-    </div>
+    </ModalTransition>
   );
 };

@@ -7,6 +7,8 @@ import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { AppShell } from './components/layout/AppShell';
 
+import { PageTransition } from './components/motion/MotionPrimitives';
+
 import { LandingPage } from './pages/LandingPage';
 import { AuthPage } from './pages/AuthPage';
 import { OnboardingPage } from './pages/OnboardingPage';
@@ -51,7 +53,9 @@ export const App: React.FC = () => {
                   <div className="min-h-screen flex flex-col justify-between bg-[var(--bg)] font-sans text-[var(--text-primary)]">
                     <Navbar />
                     <main className="flex-1">
-                      <LandingPage />
+                      <PageTransition>
+                        <LandingPage />
+                      </PageTransition>
                     </main>
                     <Footer />
                   </div>
@@ -63,7 +67,9 @@ export const App: React.FC = () => {
                   <div className="min-h-screen flex flex-col justify-between bg-[var(--bg)] font-sans text-[var(--text-primary)]">
                     <Navbar />
                     <main className="flex-1">
-                      <AuthPage />
+                      <PageTransition>
+                        <AuthPage />
+                      </PageTransition>
                     </main>
                     <Footer />
                   </div>
@@ -75,7 +81,9 @@ export const App: React.FC = () => {
                   <div className="min-h-screen flex flex-col justify-between bg-[var(--bg)] font-sans text-[var(--text-primary)]">
                     <Navbar />
                     <main className="flex-1">
-                      <AuthPage />
+                      <PageTransition>
+                        <AuthPage />
+                      </PageTransition>
                     </main>
                     <Footer />
                   </div>
@@ -87,7 +95,9 @@ export const App: React.FC = () => {
                   <div className="min-h-screen flex flex-col justify-between bg-[var(--bg)] font-sans text-[var(--text-primary)]">
                     <Navbar />
                     <main className="flex-1">
-                      <OnboardingPage />
+                      <PageTransition>
+                        <OnboardingPage />
+                      </PageTransition>
                     </main>
                     <Footer />
                   </div>

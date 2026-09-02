@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowRight,
   GitGraph,
@@ -133,98 +133,109 @@ export const LandingPage: React.FC = () => {
 
           {/* Interactive Live Content Frame */}
           <div className="p-6 bg-white min-h-[380px] flex items-center justify-center">
-            {activeTab === 'dashboard' && (
-              <div className="w-full space-y-6">
-                <div className="p-4 rounded-xl bg-[#EEF2FF] border border-[#C7D2FE] flex items-center justify-between">
-                  <div>
-                    <div className="text-xs font-bold text-[#4F46E5] uppercase tracking-wider">Target Role: AI Engineer</div>
-                    <div className="text-lg font-extrabold text-[#111827]">Career Readiness Estimate: 41%</div>
-                  </div>
-                  <div className="text-right">
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-white text-[#15803D] border border-[#BBF7D0]">
-                      +12% month
-                    </span>
-                  </div>
-                </div>
-
-                {/* Dominant Next Best Action Spotlight */}
-                <div className="p-5 rounded-xl bg-white border-2 border-[#4F46E5] shadow-sm relative">
-                  <div className="absolute -top-3 left-4 px-2.5 py-0.5 rounded bg-[#4F46E5] text-white text-[10px] font-extrabold uppercase tracking-wider">
-                    Next Best Action Spotlight
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
-                    <div>
-                      <h4 className="text-base font-bold text-[#111827]">Master Model Evaluation & Metrics</h4>
-                      <p className="text-xs text-[#4B5563] mt-1">
-                        Addresses critical gap: Needed to evaluate precision, recall, and ROC-AUC before deploying model pipelines.
-                      </p>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.22, ease: TRANSITION_EASE }}
+                className="w-full"
+              >
+                {activeTab === 'dashboard' && (
+                  <div className="w-full space-y-6">
+                    <div className="p-4 rounded-xl bg-[#EEF2FF] border border-[#C7D2FE] flex items-center justify-between">
+                      <div>
+                        <div className="text-xs font-bold text-[#4F46E5] uppercase tracking-wider">Target Role: AI Engineer</div>
+                        <div className="text-lg font-extrabold text-[#111827]">Career Readiness Estimate: 41%</div>
+                      </div>
+                      <div className="text-right">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-white text-[#15803D] border border-[#BBF7D0]">
+                          +12% month
+                        </span>
+                      </div>
                     </div>
-                    <Link to="/onboarding">
-                      <button className="px-4 py-2 bg-[#4F46E5] hover:bg-[#3730A3] text-white text-xs font-semibold rounded-md shrink-0 flex items-center gap-1.5">
-                        <span>Start Milestone</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            )}
 
-            {activeTab === 'roadmap' && (
-              <div className="w-full space-y-3">
-                <div className="p-3.5 rounded-lg bg-[#F0FDF4] border border-[#BBF7D0] flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2 font-semibold text-[#15803D]">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>01. Python Programming Foundations</span>
+                    {/* Dominant Next Best Action Spotlight */}
+                    <div className="p-5 rounded-xl bg-white border-2 border-[#4F46E5] shadow-sm relative">
+                      <div className="absolute -top-3 left-4 px-2.5 py-0.5 rounded bg-[#4F46E5] text-white text-[10px] font-extrabold uppercase tracking-wider">
+                        Next Best Action Spotlight
+                      </div>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
+                        <div>
+                          <h4 className="text-base font-bold text-[#111827]">Master Model Evaluation & Metrics</h4>
+                          <p className="text-xs text-[#4B5563] mt-1">
+                            Addresses critical gap: Needed to evaluate precision, recall, and ROC-AUC before deploying model pipelines.
+                          </p>
+                        </div>
+                        <Link to="/onboarding">
+                          <button className="px-4 py-2 bg-[#4F46E5] hover:bg-[#3730A3] text-white text-xs font-semibold rounded-md shrink-0 flex items-center gap-1.5 cursor-pointer">
+                            <span>Start Milestone</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </button>
+                        </Link>
+                      </div>
+                    </div>
                   </div>
-                  <Badge tone="success">Mastered</Badge>
-                </div>
-                <div className="p-3.5 rounded-lg bg-[#EEF2FF] border border-[#C7D2FE] flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2 font-semibold text-[#4F46E5]">
-                    <Clock className="w-4 h-4" />
-                    <span>02. Model Evaluation & Metrics</span>
-                  </div>
-                  <Badge tone="brand">In Progress</Badge>
-                </div>
-                <div className="p-3.5 rounded-lg bg-white border border-[#E5E7EB] flex items-center justify-between text-xs text-[#6B7280]">
-                  <div className="flex items-center gap-2 font-medium">
-                    <div className="w-4 h-4 rounded-full border border-[#D1D5DB]" />
-                    <span>03. Deep Learning & PyTorch Specialization</span>
-                  </div>
-                  <Badge tone="neutral">Upcoming</Badge>
-                </div>
-              </div>
-            )}
+                )}
 
-            {activeTab === 'skills' && (
-              <div className="w-full text-center py-6">
-                <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
-                  <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800">
-                    Python Programming
+                {activeTab === 'roadmap' && (
+                  <div className="w-full space-y-3">
+                    <div className="p-3.5 rounded-lg bg-[#F0FDF4] border border-[#BBF7D0] flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2 font-semibold text-[#15803D]">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>01. Python Programming Foundations</span>
+                      </div>
+                      <Badge tone="success">Mastered</Badge>
+                    </div>
+                    <div className="p-3.5 rounded-lg bg-[#EEF2FF] border border-[#C7D2FE] flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2 font-semibold text-[#4F46E5]">
+                        <Clock className="w-4 h-4" />
+                        <span>02. Model Evaluation & Metrics</span>
+                      </div>
+                      <Badge tone="brand">In Progress</Badge>
+                    </div>
+                    <div className="p-3.5 rounded-lg bg-white border border-[#E5E7EB] flex items-center justify-between text-xs text-[#6B7280]">
+                      <div className="flex items-center gap-2 font-medium">
+                        <div className="w-4 h-4 rounded-full border border-[#D1D5DB]" />
+                        <span>03. Deep Learning & PyTorch Specialization</span>
+                      </div>
+                      <Badge tone="neutral">Upcoming</Badge>
+                    </div>
                   </div>
-                  <div className="p-3 rounded-lg bg-indigo-50 border border-indigo-200 text-xs font-bold text-indigo-800 animate-pulse">
-                    Model Evaluation
-                  </div>
-                  <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs font-bold text-slate-600 opacity-60">
-                    Deep Learning
-                  </div>
-                </div>
-                <p className="text-xs text-[#6B7280] mt-4">
-                  Directed Acyclic Graph (DAG) topological prerequisite ordering active.
-                </p>
-              </div>
-            )}
+                )}
 
-            {activeTab === 'copilot' && (
-              <div className="w-full space-y-3 text-xs">
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-[#111827] max-w-lg">
-                  <span className="font-bold text-[#4F46E5]">User:</span> What should I focus on next to achieve my AI Engineer goal?
-                </div>
-                <div className="p-3 rounded-lg bg-[#EEF2FF] border border-[#C7D2FE] text-[#111827] max-w-lg ml-auto">
-                  <span className="font-bold text-[#4F46E5]">PathFinder Copilot:</span> Based on your target AI Engineer career (41% readiness), your highest-leverage milestone is Model Evaluation & Metrics (90 mins). Your Python prerequisite is already satisfied.
-                </div>
-              </div>
-            )}
+                {activeTab === 'skills' && (
+                  <div className="w-full text-center py-6">
+                    <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
+                      <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800">
+                        Python Programming
+                      </div>
+                      <div className="p-3 rounded-lg bg-indigo-50 border border-indigo-200 text-xs font-bold text-indigo-800 animate-pulse">
+                        Model Evaluation
+                      </div>
+                      <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs font-bold text-slate-600 opacity-60">
+                        Deep Learning
+                      </div>
+                    </div>
+                    <p className="text-xs text-[#6B7280] mt-4">
+                      Directed Acyclic Graph (DAG) topological prerequisite ordering active.
+                    </p>
+                  </div>
+                )}
+
+                {activeTab === 'copilot' && (
+                  <div className="w-full space-y-3 text-xs">
+                    <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-[#111827] max-w-lg">
+                      <span className="font-bold text-[#4F46E5]">User:</span> What should I focus on next to achieve my AI Engineer goal?
+                    </div>
+                    <div className="p-3 rounded-lg bg-[#EEF2FF] border border-[#C7D2FE] text-[#111827] max-w-lg ml-auto">
+                      <span className="font-bold text-[#4F46E5]">PathFinder Copilot:</span> Based on your target AI Engineer career (41% readiness), your highest-leverage milestone is Model Evaluation & Metrics (90 mins). Your Python prerequisite is already satisfied.
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
           </div>
         </motion.div>
       </section>

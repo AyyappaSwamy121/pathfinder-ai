@@ -3,6 +3,8 @@ import { api } from '../services/api';
 import { X, MessageSquare, Loader2, CheckCircle2 } from 'lucide-react';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
+import { ModalTransition } from './motion/MotionPrimitives';
+import { motion } from 'framer-motion';
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -24,8 +26,6 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  if (!isOpen) return null;
-
   const options = ['Struggling', 'Need Practice', 'Comfortable', 'Confident', 'Too Easy'];
 
   const handleSubmit = async () => {
@@ -46,11 +46,11 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius-lg)] max-w-md w-full p-6 shadow-md relative">
+    <ModalTransition isOpen={isOpen} onClose={onClose} maxWidth="max-w-md">
+      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[var(--radius-lg)] p-6 shadow-lg relative">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] p-1"
+          className="absolute top-4 right-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] p-1 rounded hover:bg-[var(--surface-sunken)] transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
@@ -77,17 +77,19 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
               </label>
               <div className="space-y-2">
                 {options.map((opt) => (
-                  <button
+                  <motion.button
                     key={opt}
+                    whileHover={{ x: 2, transition: { duration: 0.15 } }}
+                    whileTap={{ scale: 0.99 }}
                     onClick={() => setSentiment(opt)}
-                    className={`w-full text-left px-3 py-2 rounded-[var(--radius-sm)] text-xs font-medium border transition-colors ${
+                    className={`w-full text-left px-3 py-2 rounded-[var(--radius-sm)] text-xs font-medium border transition-colors cursor-pointer ${
                       sentiment === opt
-                        ? 'bg-[var(--brand-soft)] text-[var(--brand)] border-[var(--brand-soft-border)] font-semibold'
-                        : 'bg-[var(--surface)] text-[var(--text-primary)] border-[var(--border)] hover:bg-[var(--surface-sunken)]'
+                        ? 'bg-[var(--brand-soft)] text-[var(--brand)] border-[var(--brand-soft-border)] font-semibold shadow-2xs'
+                        : 'bg-[var(--surface)] text-[var(--text-primary)] border-[var(--border)] hover:bg-[var(--surface-sunken)] hover:border-slate-300'
                     }`}
                   >
                     {opt}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </div>
@@ -101,24 +103,35 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                 onChange={(e) => setComment(e.target.value)}
                 rows={3}
                 placeholder="Share any specific concepts you'd like more practice on..."
-                className="w-full p-3 rounded-[var(--radius-sm)] border border-[var(--border)] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand)]"
+                className="w-full p-3 rounded-[var(--radius-sm)] border border-[var(--border)] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--brand)] transition-colors"
               />
             </div>
 
             <div className="flex justify-end pt-2">
               <Button size="md" variant="primary" disabled={submitting} onClick={handleSubmit}>
-                {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Submit Feedback'}
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Submitting...</span>
+                  </>
+                ) : (
+                  <span>Submit Feedback</span>
+                )}
               </Button>
             </div>
           </div>
         ) : (
-          <div className="py-8 text-center space-y-2">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="py-8 text-center space-y-2"
+          >
             <CheckCircle2 className="w-8 h-8 text-[var(--success)] mx-auto" />
             <h4 className="text-sm font-bold text-[var(--text-primary)]">Feedback Received!</h4>
             <p className="text-xs text-[var(--text-secondary)]">Your roadmap path has been adaptively updated.</p>
-          </div>
+          </motion.div>
         )}
       </div>
-    </div>
+    </ModalTransition>
   );
 };
