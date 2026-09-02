@@ -18,6 +18,7 @@ import {
   LearningRoiItem,
   TransitionNode
 } from '../types';
+import { CAREER_PROFILES, generateRoleRoadmap } from './careerKnowledge';
 
 const env = (import.meta as any).env || {};
 const SUPABASE_URL = env.VITE_SUPABASE_URL || env.SUPABASE_URL || 'https://ftejyiygyykxwiwzyjvk.supabase.co';
@@ -41,38 +42,54 @@ export interface AuthResponseData {
 }
 
 // Seed Knowledge Base Data for Client Engine Fallback & Supabase Query
-const SEED_CAREERS: Career[] = [
+export const SEED_CAREERS: Career[] = [
   {
     id: 'c_ai_engineer',
     title: 'AI Engineer',
     description: 'Design, train, and deploy production-grade Artificial Intelligence and Machine Learning models.',
     icon: 'Cpu',
-    category: 'Engineering',
-    required_skills_count: 15,
+    category: 'Artificial Intelligence',
+    required_skills_count: 12,
   },
   {
     id: 'c_data_scientist',
     title: 'Data Scientist',
     description: 'Extract statistical insights, build predictive models, and perform exploratory data analysis.',
     icon: 'LineChart',
-    category: 'Analytics',
-    required_skills_count: 12,
+    category: 'Data Science',
+    required_skills_count: 11,
   },
   {
     id: 'c_fullstack_dev',
     title: 'Full Stack Developer',
     description: 'Build modern frontend React applications and scalable FastAPI/Node backend web microservices.',
-    icon: 'Code',
-    category: 'Engineering',
-    required_skills_count: 14,
+    icon: 'Code2',
+    category: 'Software Engineering',
+    required_skills_count: 11,
   },
   {
     id: 'c_data_analyst',
     title: 'Data Analyst',
     description: 'Transform complex business datasets into intuitive dashboards, SQL queries, and visual reporting.',
-    icon: 'BarChart',
+    icon: 'BarChart3',
     category: 'Analytics',
-    required_skills_count: 10,
+    required_skills_count: 6,
+  },
+  {
+    id: 'c_cloud_engineer',
+    title: 'Cloud Engineer',
+    description: 'Architect, provision, and maintain secure resilient cloud infrastructure on AWS and Kubernetes.',
+    icon: 'Cloud',
+    category: 'Cloud & Infrastructure',
+    required_skills_count: 8,
+  },
+  {
+    id: 'c_cybersecurity',
+    title: 'Cybersecurity Engineer',
+    description: 'Protect critical digital infrastructure, audit network security, and analyze vulnerabilities.',
+    icon: 'ShieldCheck',
+    category: 'Security',
+    required_skills_count: 6,
   },
 ];
 
@@ -337,12 +354,14 @@ export const api = {
   getCurrentProfile: async (): Promise<LearnerProfile> => {
     const isDemo = sessionStorage.getItem('pathfinder_demo_mode') === 'true';
     const preset = sessionStorage.getItem('pathfinder_demo_preset') || 'alex';
+    const savedCareer = localStorage.getItem('pathfinder_target_career') || sessionStorage.getItem('pathfinder_target_career');
 
     if (isDemo) {
+      const targetCareerId = savedCareer || (preset === 'jordan' ? 'c_data_analyst' : preset === 'devon' ? 'c_fullstack_dev' : 'c_ai_engineer');
       return {
         id: `prof_${preset}_001`,
         user_id: `usr_${preset}_demo`,
-        target_career_id: preset === 'jordan' ? 'c_data_analyst' : preset === 'devon' ? 'c_fullstack_dev' : 'c_ai_engineer',
+        target_career_id: targetCareerId,
         experience_level: preset === 'jordan' ? 'Beginner' : 'Intermediate',
         weekly_hours: 8,
         timeline_months: 6,
@@ -357,7 +376,7 @@ export const api = {
       return {
         id: 'prof_guest',
         user_id: 'guest',
-        target_career_id: 'c_ai_engineer',
+        target_career_id: savedCareer || 'c_ai_engineer',
         experience_level: 'Beginner',
         weekly_hours: 8,
         timeline_months: 6,
@@ -375,10 +394,11 @@ export const api = {
       .single();
 
     if (realProfile) {
+      const activeCareer = savedCareer || realProfile.target_career_id || 'c_ai_engineer';
       return {
         id: realProfile.id,
         user_id: realProfile.user_id,
-        target_career_id: realProfile.target_career_id || 'c_ai_engineer',
+        target_career_id: activeCareer,
         experience_level: realProfile.experience_level || 'Beginner',
         weekly_hours: realProfile.weekly_hours || 8,
         timeline_months: realProfile.timeline_months || 6,
@@ -391,10 +411,11 @@ export const api = {
 
     // Auto-create default learner profile if first time
     const newProfId = `prof_${user.id.slice(0, 12)}`;
+    const initialCareer = savedCareer || 'c_ai_engineer';
     await supabase.from('learner_profiles').upsert({
       id: newProfId,
       user_id: user.id,
-      target_career_id: 'c_ai_engineer',
+      target_career_id: initialCareer,
       experience_level: 'Beginner',
       weekly_hours: 8,
       timeline_months: 6,
@@ -405,7 +426,7 @@ export const api = {
     return {
       id: newProfId,
       user_id: user.id,
-      target_career_id: 'c_ai_engineer',
+      target_career_id: initialCareer,
       experience_level: 'Beginner',
       weekly_hours: 8,
       timeline_months: 6,
@@ -415,134 +436,124 @@ export const api = {
     };
   },
 
-  // Dashboard & Navigation Data
+  // Switch target career role and recalculate across state
+  setTargetCareer: async (careerId: string): Promise<void> => {
+    localStorage.setItem('pathfinder_target_career', careerId);
+    sessionStorage.setItem('pathfinder_target_career', careerId);
+
+    try {
+      await apiClient.post('/api/profile/career', { career_id: careerId });
+    } catch (_) {}
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase
+          .from('learner_profiles')
+          .update({ target_career_id: careerId, updated_at: new Date().toISOString() })
+          .eq('user_id', user.id);
+      }
+    } catch (_) {}
+  },
+
+  // Dashboard & Navigation Data - Role-Aware
   getDashboard: async (): Promise<DashboardData> => {
-    const isDemo = sessionStorage.getItem('pathfinder_demo_mode') === 'true';
-    const preset = sessionStorage.getItem('pathfinder_demo_preset') || 'alex';
+    // Try FastAPI dashboard first if running
+    try {
+      const { data } = await apiClient.get<DashboardData>('/api/dashboard');
+      if (data && data.target_career) {
+        return data;
+      }
+    } catch (_) {}
 
     const profile = await api.getCurrentProfile();
-    const targetCareer = SEED_CAREERS.find((c) => c.id === profile.target_career_id) || SEED_CAREERS[0];
+    const targetCareerId = profile.target_career_id || 'c_ai_engineer';
+    const careerCfg = CAREER_PROFILES[targetCareerId] || CAREER_PROFILES.c_ai_engineer;
+    const targetCareer: Career = {
+      id: careerCfg.id,
+      title: careerCfg.title,
+      description: careerCfg.description,
+      icon: careerCfg.icon,
+      category: careerCfg.category,
+      required_skills_count: careerCfg.required_skills_count,
+    };
 
-    if (isDemo) {
-      const mastered: LearnerSkillStatus[] = preset === 'jordan' ? [
-        { skill_id: 's_python', name: 'Python Basics', category: 'Language', proficiency: 'Beginner', confidence: 'Medium', status: 'MASTERED' }
-      ] : preset === 'devon' ? [
-        { skill_id: 's_ts', name: 'TypeScript Core', category: 'Language', proficiency: 'Intermediate', confidence: 'High', status: 'MASTERED' },
-        { skill_id: 's_fastapi', name: 'FastAPI Microservices', category: 'Backend', proficiency: 'Intermediate', confidence: 'High', status: 'MASTERED' },
-      ] : [
-        { skill_id: 's_python', name: 'Python Programming', category: 'Language', proficiency: 'Intermediate', confidence: 'High', status: 'MASTERED' },
-        { skill_id: 's_sql', name: 'SQL & Relational Databases', category: 'Data', proficiency: 'Intermediate', confidence: 'High', status: 'MASTERED' },
-      ];
-
-      const developing: LearnerSkillStatus[] = [
-        { skill_id: 's_model_eval', name: 'Model Evaluation & Metrics', category: 'ML', proficiency: 'Intermediate', confidence: 'Medium', status: 'DEVELOPING' },
-      ];
-
-      const missing: LearnerSkillStatus[] = [
-        { skill_id: 's_deep_learning', name: 'Deep Learning & PyTorch', category: 'AI', proficiency: 'Beginner', confidence: 'Low', status: 'MISSING' },
-      ];
-
-      return {
-        profile,
-        target_career: targetCareer,
-        readiness_score: profile.readiness_score || 41.3,
-        next_best_action: {
-          skill_id: 's_model_eval',
-          skill_name: 'Model Evaluation & Metrics',
-          title: 'Master Model Evaluation',
-          action_type: 'Assessment',
-          estimated_minutes: 90,
-          why_now: `Unlocks next milestone for ${targetCareer.title} path.`,
-          cta_label: 'Start Micro-Assessment',
-          item_id: 'a_model_eval',
-        },
-        milestones_completed: preset === 'jordan' ? 3 : preset === 'devon' ? 10 : 8,
-        milestones_total: 15,
-        skill_gaps: {
-          target_career: targetCareer.title,
-          readiness_score: profile.readiness_score || 41.3,
-          mastered,
-          developing,
-          missing,
-          locked: [],
-          recommended: developing,
-        },
-        ai_insight: `[Demo Workspace] Unlocked milestone 'Model Evaluation & Metrics' targeting ${targetCareer.title}.`,
-      };
+    // Determine initial mastered/developing skills based on target career
+    let defaultMasteredIds: string[] = [];
+    if (targetCareerId === 'c_ai_engineer') {
+      defaultMasteredIds = ['s_python', 's_numpy', 's_pandas'];
+    } else if (targetCareerId === 'c_data_scientist') {
+      defaultMasteredIds = ['s_python', 's_sql'];
+    } else if (targetCareerId === 'c_fullstack_dev') {
+      defaultMasteredIds = ['s_html_css', 's_typescript'];
+    } else if (targetCareerId === 'c_data_analyst') {
+      defaultMasteredIds = ['s_excel', 's_sql'];
+    } else if (targetCareerId === 'c_cloud_engineer') {
+      defaultMasteredIds = ['s_linux', 's_networking'];
+    } else if (targetCareerId === 'c_cybersecurity') {
+      defaultMasteredIds = ['s_linux', 's_networking'];
     }
 
-    // REAL AUTHENTICATED SUPABASE USER DASHBOARD
-    const { data: { user } } = await supabase.auth.getUser();
-    const meta = user?.user_metadata || {};
-    const firstName = meta.first_name || 'Learner';
+    const { readinessScore } = generateRoleRoadmap(targetCareerId, defaultMasteredIds, profile.weekly_hours || 8);
 
-    // Fetch user skills from Supabase
-    const { data: dbSkills } = await supabase
-      .from('learner_skills')
-      .select('*')
-      .eq('profile_id', profile.id);
-
-    const mastered: LearnerSkillStatus[] = (dbSkills || [])
-      .filter((s: any) => s.status === 'MASTERED')
-      .map((s: any) => ({
-        skill_id: s.skill_id,
-        name: s.skill_id,
-        category: 'Skill',
-        proficiency: s.proficiency || 'Intermediate',
-        confidence: s.confidence || 'High',
+    const mastered: LearnerSkillStatus[] = careerCfg.skills
+      .filter((s) => defaultMasteredIds.includes(s.id))
+      .map((s) => ({
+        skill_id: s.id,
+        name: s.name,
+        category: s.category,
+        proficiency: s.difficulty,
+        confidence: 'High',
         status: 'MASTERED',
       }));
 
-    const developing: LearnerSkillStatus[] = (dbSkills || [])
-      .filter((s: any) => s.status === 'DEVELOPING')
-      .map((s: any) => ({
-        skill_id: s.skill_id,
-        name: s.skill_id,
-        category: 'Skill',
-        proficiency: s.proficiency || 'Beginner',
-        confidence: s.confidence || 'Medium',
-        status: 'DEVELOPING',
-      }));
+    const developingSkills = careerCfg.skills.filter((s) => !defaultMasteredIds.includes(s.id));
+    const developing: LearnerSkillStatus[] = developingSkills.slice(0, 1).map((s) => ({
+      skill_id: s.id,
+      name: s.name,
+      category: s.category,
+      proficiency: s.difficulty,
+      confidence: 'Medium',
+      status: 'DEVELOPING',
+    }));
 
-    const defaultMastered: LearnerSkillStatus[] = mastered.length > 0 ? mastered : [
-      { skill_id: 's_python', name: 'Python Programming', category: 'Language', proficiency: 'Intermediate', confidence: 'High', status: 'MASTERED' },
-      { skill_id: 's_sql', name: 'SQL & Relational Databases', category: 'Data', proficiency: 'Intermediate', confidence: 'High', status: 'MASTERED' },
-    ];
+    const missing: LearnerSkillStatus[] = developingSkills.slice(1).map((s) => ({
+      skill_id: s.id,
+      name: s.name,
+      category: s.category,
+      proficiency: s.difficulty,
+      confidence: 'Low',
+      status: 'MISSING',
+    }));
 
-    const defaultDeveloping: LearnerSkillStatus[] = developing.length > 0 ? developing : [
-      { skill_id: 's_model_eval', name: 'Model Evaluation & Metrics', category: 'ML', proficiency: 'Intermediate', confidence: 'Medium', status: 'DEVELOPING' },
-    ];
-
-    const missing: LearnerSkillStatus[] = [
-      { skill_id: 's_deep_learning', name: 'Deep Learning & PyTorch', category: 'AI', proficiency: 'Beginner', confidence: 'Low', status: 'MISSING' },
-    ];
+    const nextAction = careerCfg.default_next_action;
 
     return {
       profile,
       target_career: targetCareer,
-      readiness_score: profile.readiness_score || 41.3,
+      readiness_score: readinessScore,
       next_best_action: {
-        skill_id: 's_model_eval',
-        skill_name: 'Model Evaluation & Metrics',
-        title: 'Master Model Evaluation',
-        action_type: 'Assessment',
-        estimated_minutes: 90,
-        why_now: `Critical gap for ${firstName}'s ${targetCareer.title} path.`,
-        cta_label: 'Start Micro-Assessment',
-        item_id: 'a_model_eval',
+        skill_id: nextAction.skill_id,
+        skill_name: nextAction.skill_name,
+        title: nextAction.title,
+        action_type: nextAction.action_type,
+        estimated_minutes: nextAction.estimated_minutes,
+        why_now: nextAction.why_now,
+        cta_label: nextAction.cta_label,
+        item_id: nextAction.item_id,
       },
-      milestones_completed: defaultMastered.length + 6,
-      milestones_total: 15,
+      milestones_completed: mastered.length,
+      milestones_total: careerCfg.skills.length,
       skill_gaps: {
         target_career: targetCareer.title,
-        readiness_score: profile.readiness_score || 41.3,
-        mastered: defaultMastered,
-        developing: defaultDeveloping,
+        readiness_score: readinessScore,
+        mastered,
+        developing,
         missing,
         locked: [],
-        recommended: defaultDeveloping,
+        recommended: developing,
       },
-      ai_insight: `Welcome back, ${firstName}! Your personal ${targetCareer.title} roadmap is active in your Supabase workspace.`,
+      ai_insight: `Your personalized ${targetCareer.title} roadmap is active. Next focus: master ${nextAction.skill_name}.`,
     };
   },
 
@@ -565,16 +576,49 @@ export const api = {
     };
   },
 
-  getCurrentPath: async (): Promise<LearningPath> => ({
-    id: 'path_001',
-    profile_id: 'prof_alex_001',
-    career_id: 'c_ai_engineer',
-    career_title: 'AI Engineer',
-    total_steps: 15,
-    completed_steps: 8,
-    is_active: true,
-    steps: SEED_STEPS,
-  }),
+  // Role-Aware Dynamic Roadmap Path
+  getCurrentPath: async (): Promise<LearningPath> => {
+    // Try FastAPI backend if active
+    try {
+      const { data } = await apiClient.get<LearningPath>('/api/paths/current');
+      if (data && data.steps && data.steps.length > 0) {
+        return data;
+      }
+    } catch (_) {}
+
+    const profile = await api.getCurrentProfile();
+    const targetCareerId = profile.target_career_id || 'c_ai_engineer';
+
+    let defaultMasteredIds: string[] = [];
+    if (targetCareerId === 'c_ai_engineer') {
+      defaultMasteredIds = ['s_python', 's_numpy', 's_pandas'];
+    } else if (targetCareerId === 'c_data_scientist') {
+      defaultMasteredIds = ['s_python', 's_sql'];
+    } else if (targetCareerId === 'c_fullstack_dev') {
+      defaultMasteredIds = ['s_html_css', 's_typescript'];
+    } else if (targetCareerId === 'c_data_analyst') {
+      defaultMasteredIds = ['s_excel', 's_sql'];
+    } else if (targetCareerId === 'c_cloud_engineer' || targetCareerId === 'c_cybersecurity') {
+      defaultMasteredIds = ['s_linux', 's_networking'];
+    }
+
+    const { career, steps, totalSteps, completedSteps } = generateRoleRoadmap(
+      targetCareerId,
+      defaultMasteredIds,
+      profile.weekly_hours || 8
+    );
+
+    return {
+      id: `path_${profile.id}_${targetCareerId}`,
+      profile_id: profile.id,
+      career_id: targetCareerId,
+      career_title: career.title,
+      total_steps: totalSteps,
+      completed_steps: completedSteps,
+      is_active: true,
+      steps,
+    };
+  },
 
   generatePath: async (): Promise<LearningPath> => api.getCurrentPath(),
 
@@ -583,42 +627,59 @@ export const api = {
     return dash.skill_gaps;
   },
 
-  getSkills: async () => [
-    { id: 's_python', name: 'Python Programming', category: 'Language', difficulty: 'Beginner', prerequisite_ids: [] },
-    { id: 's_sql', name: 'SQL & Relational Databases', category: 'Data', difficulty: 'Intermediate', prerequisite_ids: [] },
-    { id: 's_model_eval', name: 'Model Evaluation & Metrics', category: 'ML', difficulty: 'Intermediate', prerequisite_ids: ['s_python'] },
-  ],
+  getSkills: async () => {
+    const profile = await api.getCurrentProfile();
+    const targetCareerId = profile.target_career_id || 'c_ai_engineer';
+    const careerCfg = CAREER_PROFILES[targetCareerId] || CAREER_PROFILES.c_ai_engineer;
+    return careerCfg.skills.map((s) => ({
+      id: s.id,
+      name: s.name,
+      category: s.category,
+      difficulty: s.difficulty,
+      prerequisite_ids: s.prerequisites,
+    }));
+  },
 
-  getAssessment: async (assessmentId: string): Promise<AssessmentDetail> => ({
-    id: assessmentId,
-    skill_id: 's_model_eval',
-    skill_name: 'Model Evaluation & Metrics',
-    title: 'Model Evaluation & Metrics Assessment',
-    description: 'Verify your understanding of ROC-AUC, precision, recall, and confusion matrix interpretation.',
-    questions: [
-      {
-        id: 'q1',
-        question_text: 'When dealing with severely imbalanced medical diagnosis data, which metric should be prioritized over Accuracy?',
-        options: ['Precision & Recall (F1-Score)', 'Mean Squared Error', 'Adjusted R-Squared', 'Training Velocity'],
-      },
-      {
-        id: 'q2',
-        question_text: 'What does an ROC-AUC score of 0.5 indicate for a binary classification model?',
-        options: ['Perfect classification performance', 'Performance no better than random guessing', 'Overfitting on the training set', 'Zero false positive rate'],
-      },
-    ],
-  }),
+  // Role-Aware Assessment Retrieval
+  getAssessment: async (assessmentId: string): Promise<AssessmentDetail> => {
+    // Search all career profiles for matching assessment
+    for (const cp of Object.values(CAREER_PROFILES)) {
+      for (const s of cp.skills) {
+        if (s.assessment && (s.assessment.id === assessmentId || s.id === assessmentId)) {
+          return s.assessment;
+        }
+      }
+    }
+
+    // Default fallback
+    return (
+      CAREER_PROFILES.c_ai_engineer.skills.find((s) => s.assessment)?.assessment || {
+        id: assessmentId,
+        skill_id: 's_model_eval',
+        skill_name: 'Model Evaluation & Metrics',
+        title: 'Model Evaluation & Metrics Assessment',
+        description: 'Verify your understanding of precision, recall, and evaluation metrics.',
+        questions: [
+          {
+            id: 'q1',
+            question_text: 'When dealing with severely imbalanced medical diagnosis data, which metric should be prioritized?',
+            options: ['Precision', 'Recall (Sensitivity)', 'Specificity', 'Accuracy'],
+          },
+        ],
+      }
+    );
+  },
 
   evaluateAssessment: async (
     assessment_id: string,
     answers: Record<string, number>
   ): Promise<AssessmentEvaluateResponse> => ({
-    result_id: 'res_99182',
+    result_id: `res_${Date.now()}`,
     score_percentage: 100.0,
     passed: true,
     weak_skills: [],
-    strong_skills: ['Model Evaluation & Metrics'],
-    recommendation: 'Mastered! Unlocked Phase 3: Deep Learning & Neural Networks.',
+    strong_skills: ['Target Competency'],
+    recommendation: 'Proficiency verified! Next milestone unlocked on your personalized roadmap.',
   }),
 
   submitFeedback: async (skill_id: string, sentiment: string, comment?: string) => ({
@@ -627,19 +688,32 @@ export const api = {
     path_updated: true,
   }),
 
+  // Role-Aware AI Copilot Chat
   sendChatMessage: async (message: string): Promise<ChatResponse> => {
+    const profile = await api.getCurrentProfile();
+    const targetCareerId = profile.target_career_id || 'c_ai_engineer';
+    const careerCfg = CAREER_PROFILES[targetCareerId] || CAREER_PROFILES.c_ai_engineer;
+
     try {
       const { data, error } = await supabase.functions.invoke('ai-copilot', {
-        body: { message, context: { target_career: 'AI Engineer', readiness_score: 41.3 } },
+        body: {
+          message,
+          context: {
+            target_career: careerCfg.title,
+            readiness_score: profile.readiness_score || 45.0,
+            next_action: careerCfg.default_next_action,
+          },
+        },
       });
       if (!error && data?.reply) {
         return data;
       }
     } catch (_) {}
 
+    let roleAction = careerCfg.default_next_action.title;
     return {
-      reply: `PathFinder Copilot: Based on your current AI Engineer path (41% readiness), your top priority is mastering Model Evaluation before advancing to Deep Learning.`,
-      suggested_actions: ['Start Next Action', 'View Roadmap', 'What-if Simulator'],
+      reply: `PathFinder Copilot: Based on your current ${careerCfg.title} roadmap (${Math.round(profile.readiness_score || 42)}% readiness), your top priority is mastering **${roleAction}** to unlock downstream requirements.`,
+      suggested_actions: ['Start Next Action', 'View Roadmap', 'Explore Career Twin'],
     };
   },
 

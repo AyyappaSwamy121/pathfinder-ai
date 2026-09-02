@@ -144,6 +144,18 @@ def run_all_backend_tests():
     assert len(exp_data["key_takeaways"]) > 0
     print("[PASS] Career Twin Grounded AI Explanation Passed | Snippet:", exp_data["explanation"][:60], "...")
 
+    # 14. Role-Specific Career Switching & Roadmap Generation
+    res = client.post("/api/profile/career", json={"career_id": "c_fullstack_dev"})
+    assert res.status_code == 200, f"Career switch failed: {res.text}"
+    res = client.get("/api/paths/current")
+    assert res.status_code == 200
+    fs_path = res.json()
+    assert fs_path["career_id"] == "c_fullstack_dev"
+    assert "Full Stack Developer" in fs_path["career_title"]
+    fs_skills = [s["skill_name"] for s in fs_path["steps"]]
+    assert any("React" in s or "HTML" in s or "TypeScript" in s for s in fs_skills)
+    print(f"[PASS] Role-Specific Roadmap Generation Passed | Role: Full Stack Developer | Steps: {len(fs_path['steps'])} | First skills: {fs_skills[:3]}")
+
     print("=== ALL BACKEND TESTS PASSED SUCCESSFULLY! ===")
 
 if __name__ == "__main__":

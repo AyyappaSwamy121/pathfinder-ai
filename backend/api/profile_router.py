@@ -81,3 +81,25 @@ def update_profile(
     RoadmapEngine.generate_roadmap(db, profile_id)
 
     return {"status": "success", "message": "Profile updated and path generated successfully"}
+
+@router.post("/career")
+def set_target_career(
+    payload: dict,
+    db: Session = Depends(get_db),
+    profile_id: str = Depends(get_current_profile_id),
+    user_id: str = Depends(get_current_user_id)
+):
+    """Directly switch target career role and recalculate role-specific path."""
+    career_id = payload.get("career_id", "c_ai_engineer")
+    profile = db.query(LearnerProfile).filter(LearnerProfile.id == profile_id).first()
+    if not profile:
+        profile = LearnerProfile(id=profile_id, user_id=user_id, target_career_id=career_id, readiness_score=20.0)
+        db.add(profile)
+    else:
+        profile.target_career_id = career_id
+    db.commit()
+
+    SkillGapEngine.analyze_gaps(db, profile_id, career_id)
+    RoadmapEngine.generate_roadmap(db, profile_id, career_id)
+    return {"status": "success", "career_id": career_id}
+

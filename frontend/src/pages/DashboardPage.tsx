@@ -12,6 +12,7 @@ import { ArrowRight, ChevronRight, GitCompare, Sparkles } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
+import { SEED_CAREERS } from '../services/api';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts';
 import {
   StaggerContainer,
@@ -24,7 +25,7 @@ import {
 import { motion } from 'framer-motion';
 
 export const DashboardPage: React.FC = () => {
-  const { dashboard, loading, refreshState, user: learnerUser, isDemoMode } = useLearner();
+  const { dashboard, loading, refreshState, user: learnerUser, isDemoMode, setTargetCareer } = useLearner();
   const { user: authUser } = useAuth();
 
   const [whyThisOpen, setWhyThisOpen] = useState(false);
@@ -94,8 +95,25 @@ export const DashboardPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Link to="/career-twin">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Target Role Switcher */}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#CBD5E1] bg-[#F8FAFC]">
+              <span className="text-xs font-semibold text-[#64748B]">Target Role:</span>
+              <select
+                value={dashboard.target_career?.id || 'c_ai_engineer'}
+                onChange={(e) => setTargetCareer(e.target.value)}
+                className="text-xs font-bold text-[#4338CA] bg-transparent focus:outline-none cursor-pointer"
+                aria-label="Switch Target Career"
+              >
+                {SEED_CAREERS.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <Link to={`/career-twin?target=${dashboard.target_career?.id || 'c_ai_engineer'}`}>
               <Button size="sm" variant="secondary" className="border-indigo-200 text-[#4F46E5] hover:bg-indigo-50/50">
                 <GitCompare className="w-3.5 h-3.5 mr-1" />
                 <span>Simulate in Career Twin</span>
@@ -328,7 +346,7 @@ export const DashboardPage: React.FC = () => {
       <AssessmentModal
         isOpen={assessmentOpen}
         onClose={() => setAssessmentOpen(false)}
-        assessmentId="a_model_eval"
+        assessmentId={dashboard.next_best_action?.item_id || 'a_model_eval'}
         onCompleted={refreshState}
       />
 

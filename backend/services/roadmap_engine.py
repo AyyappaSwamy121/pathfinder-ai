@@ -7,6 +7,8 @@ from backend.models.domain import (
 )
 from backend.ai.llm_client import llm_client
 
+from backend.services.career_knowledge import CAREER_KNOWLEDGE
+
 class RoadmapEngine:
 
     @staticmethod
@@ -72,17 +74,18 @@ class RoadmapEngine:
         db.add(new_path)
         db.commit()
 
-        # Map steps into 5 structured Phases
-        phases = [
-            (1, "Phase 1: Foundations"),
-            (2, "Phase 2: Core Modeling"),
-            (3, "Phase 3: Deep Learning & Advanced AI"),
-            (4, "Phase 4: Production & MLOps Infrastructure"),
-            (5, "Phase 5: Capstone Project")
+        # Fetch role-specific phases from centralized CAREER_KNOWLEDGE
+        career_info = CAREER_KNOWLEDGE.get(target_career_id, CAREER_KNOWLEDGE.get("c_ai_engineer"))
+        role_phases = career_info["phases"] if career_info and "phases" in career_info else [
+            (1, "Phase 1: Foundations", "Foundations"),
+            (2, "Phase 2: Core Competencies", "Core"),
+            (3, "Phase 3: Advanced Concepts", "Advanced"),
+            (4, "Phase 4: Production Engineering", "Production"),
+            (5, "Phase 5: Capstone Project", "Capstone")
         ]
 
         total_nodes = len(order)
-        nodes_per_phase = max(1, total_nodes // 4)
+        nodes_per_phase = max(1, (total_nodes + len(role_phases) - 1) // len(role_phases))
 
         completed_count = 0
         for idx, skill_id in enumerate(order):
@@ -102,9 +105,9 @@ class RoadmapEngine:
             elif idx == completed_count:
                 step_status = "IN_PROGRESS"
 
-            # Assign phase
-            phase_idx = min(4, idx // nodes_per_phase)
-            phase_num, phase_title = phases[phase_idx]
+            # Assign role-specific phase
+            phase_idx = min(len(role_phases) - 1, idx // nodes_per_phase)
+            phase_num, phase_title = role_phases[phase_idx][0], role_phases[phase_idx][1]
 
             # Generate explainable reason
             prereq_names = [

@@ -318,6 +318,76 @@ RESOURCES_SEED = [
         "provider": "MLflow Docs", "type": "Documentation", "difficulty": "Advanced", "duration_minutes": 150,
         "url": "https://mlflow.org/docs/latest/index.html",
         "why_this": "Implement experiment tracking, artifact registry, automated model evaluation, and monitoring."
+    },
+    # HTML / CSS
+    {
+        "id": "r_html_1", "skill_id": "s_html_css", "title": "Modern HTML5 & Responsive CSS Grid",
+        "provider": "MDN Web Docs", "type": "Documentation", "difficulty": "Beginner", "duration_minutes": 90,
+        "url": "https://developer.mozilla.org/en-US/docs/Learn/HTML",
+        "why_this": "Build semantic interfaces and accessible responsive page layouts."
+    },
+    # TypeScript
+    {
+        "id": "r_ts_1", "skill_id": "s_typescript", "title": "TypeScript Handbook & Type System",
+        "provider": "TypeScript Docs", "type": "Documentation", "difficulty": "Intermediate", "duration_minutes": 100,
+        "url": "https://www.typescriptlang.org/docs/handbook/",
+        "why_this": "Write type-safe scalable frontend and backend code."
+    },
+    # React
+    {
+        "id": "r_react_1", "skill_id": "s_react", "title": "React.js Documentation & Modern Hooks",
+        "provider": "React.dev", "type": "Course", "difficulty": "Intermediate", "duration_minutes": 150,
+        "url": "https://react.dev/learn",
+        "why_this": "Master component lifecycles, hooks, virtual DOM, and single-page application state."
+    },
+    # Node.js
+    {
+        "id": "r_node_1", "skill_id": "s_nodejs", "title": "Node.js & Express RESTful Services",
+        "provider": "Node.js Guides", "type": "Tutorial", "difficulty": "Intermediate", "duration_minutes": 120,
+        "url": "https://nodejs.org/en/docs/guides/",
+        "why_this": "Build scalable server-side asynchronous APIs and middleware."
+    },
+    # SQL
+    {
+        "id": "r_sql_1", "skill_id": "s_sql", "title": "PostgreSQL & SQL Query Optimization",
+        "provider": "PostgreSQL Docs", "type": "Course", "difficulty": "Intermediate", "duration_minutes": 120,
+        "url": "https://www.postgresql.org/docs/",
+        "why_this": "Write performant queries, multi-table joins, and complex analytical aggregations."
+    },
+    # Excel
+    {
+        "id": "r_excel_1", "skill_id": "s_excel", "title": "Advanced Excel & Financial Modeling",
+        "provider": "Excel Campus", "type": "Course", "difficulty": "Beginner", "duration_minutes": 90,
+        "url": "https://support.microsoft.com/excel",
+        "why_this": "Master pivot tables, VLOOKUP, INDEX/MATCH, and automated spreadsheets."
+    },
+    # Tableau
+    {
+        "id": "r_tableau_1", "skill_id": "s_tableau", "title": "Tableau Business Intelligence Visualizations",
+        "provider": "Tableau Training", "type": "Tutorial", "difficulty": "Intermediate", "duration_minutes": 110,
+        "url": "https://www.tableau.com/learn/training",
+        "why_this": "Transform raw business metrics into interactive storytelling dashboards."
+    },
+    # Linux
+    {
+        "id": "r_linux_1", "skill_id": "s_linux", "title": "Linux Command Line & Bash Automation",
+        "provider": "Linux Foundation", "type": "Course", "difficulty": "Beginner", "duration_minutes": 100,
+        "url": "https://linuxfoundation.org",
+        "why_this": "Master system administration, process management, and shell automation scripts."
+    },
+    # AWS
+    {
+        "id": "r_aws_1", "skill_id": "s_aws", "title": "AWS Cloud Practitioner & Architecture Guide",
+        "provider": "AWS Skill Builder", "type": "Course", "difficulty": "Intermediate", "duration_minutes": 180,
+        "url": "https://aws.amazon.com/training/",
+        "why_this": "Architect scalable cloud compute, storage, VPC subnets, and IAM perimeters."
+    },
+    # Cloud Security
+    {
+        "id": "r_cloud_sec_1", "skill_id": "s_cloud_security", "title": "Zero-Trust Cloud Architecture & Security",
+        "provider": "Cloud Security Alliance", "type": "Documentation", "difficulty": "Advanced", "duration_minutes": 120,
+        "url": "https://cloudsecurityalliance.org",
+        "why_this": "Enforce zero-trust principles, cryptographic secret vaulting, and cloud governance."
     }
 ]
 
@@ -371,6 +441,80 @@ PROJECTS_SEED = [
         "estimated_hours": 14,
         "deliverables": ["Dockerfile & docker-compose setup", "FastAPI inference app with Pydantic validation", "Locust load test results"],
         "portfolio_value": "Exhibits production readiness by bridging data science models with cloud web service architecture."
+    },
+    # Full Stack Developer Projects
+    {
+        "id": "p_fullstack_saas",
+        "skill_id": "s_react",
+        "title": "Interactive SaaS Collaboration Platform",
+        "objective": "Engineer a responsive React single-page application with TypeScript, state management, and real-time dashboard analytics.",
+        "difficulty": "Intermediate",
+        "estimated_hours": 16,
+        "deliverables": ["React SPA repository", "Tailwind CSS component library", "Unit test suite with Jest/RTL"],
+        "portfolio_value": "Proves frontend component architecture and complex UI state management for production web apps."
+    },
+    {
+        "id": "p_rest_microservices",
+        "skill_id": "s_nodejs",
+        "title": "Scalable RESTful Backend Microservices",
+        "objective": "Build a secure REST API with Node.js/Express, JWT authentication, PostgreSQL integration, and rate limiting.",
+        "difficulty": "Intermediate",
+        "estimated_hours": 14,
+        "deliverables": ["Node/Express API repository", "OpenAPI / Swagger documentation", "Postman integration test collection"],
+        "portfolio_value": "Validates ability to engineer production backend services handling authentication and relational data."
+    },
+    # Data Analyst Projects
+    {
+        "id": "p_exec_dashboard",
+        "skill_id": "s_tableau",
+        "title": "Executive Business Intelligence KPI Dashboard",
+        "objective": "Connect multi-table SQL data sources into an interactive Tableau/PowerBI dashboard tracking revenue, churn, and cohort metrics.",
+        "difficulty": "Intermediate",
+        "estimated_hours": 10,
+        "deliverables": ["Interactive Tableau dashboard workbook", "SQL data transformation queries", "Executive summary slides"],
+        "portfolio_value": "Demonstrates executive reporting and visual data storytelling driving business decisions."
+    },
+    {
+        "id": "p_sql_analytics",
+        "skill_id": "s_sql",
+        "title": "E-Commerce Relational Analytics Pipeline",
+        "objective": "Write complex SQL analytics utilizing window functions, CTEs, and cohort aggregations to uncover user retention trends.",
+        "difficulty": "Intermediate",
+        "estimated_hours": 8,
+        "deliverables": ["PostgreSQL query scripts", "Cohort retention analysis table", "Data optimization benchmark"],
+        "portfolio_value": "Demonstrates advanced SQL proficiency for database reporting and business intelligence."
+    },
+    # Cloud Engineer Projects
+    {
+        "id": "p_cloud_infra",
+        "skill_id": "s_aws",
+        "title": "Resilient Multi-Tier AWS Infrastructure",
+        "objective": "Architect a highly available cloud infrastructure on AWS utilizing EC2 Auto Scaling, Application Load Balancer, S3, and RDS.",
+        "difficulty": "Advanced",
+        "estimated_hours": 16,
+        "deliverables": ["CloudFormation / Terraform configuration", "VPC architecture diagram", "Failover recovery verification test"],
+        "portfolio_value": "Demonstrates enterprise-grade cloud architecture design and resilient infrastructure provisioning."
+    },
+    {
+        "id": "p_k8s_cluster",
+        "skill_id": "s_kubernetes",
+        "title": "Containerized Microservice Kubernetes Deployment",
+        "objective": "Deploy a multi-service web application onto a Kubernetes cluster with Helm charts, Ingress controllers, and automated horizontal pod scaling.",
+        "difficulty": "Advanced",
+        "estimated_hours": 18,
+        "deliverables": ["Kubernetes manifest YAMLs", "Helm chart package", "Cluster autoscaling verification logs"],
+        "portfolio_value": "Proves container orchestration and enterprise DevOps delivery competency."
+    },
+    # Cybersecurity Engineer Projects
+    {
+        "id": "p_security_audit",
+        "skill_id": "s_cloud_security",
+        "title": "Zero-Trust Cloud IAM & Network Security Audit",
+        "objective": "Perform a comprehensive security audit on cloud infrastructure, enforcing least privilege access, TLS encryption, and audit logging.",
+        "difficulty": "Advanced",
+        "estimated_hours": 14,
+        "deliverables": ["IAM policy hardening scripts", "Threat model diagram", "Security audit compliance report"],
+        "portfolio_value": "Demonstrates ability to identify vulnerabilities and harden cloud perimeters against unauthorized intrusion."
     }
 ]
 
@@ -415,36 +559,111 @@ ASSESSMENTS_SEED = [
         ]
     },
     {
-        "id": "a_supervised",
-        "skill_id": "s_supervised_learning",
-        "title": "Supervised Learning Core Concepts",
-        "description": "Evaluate core concepts in decision trees, ensemble methods, gradient boosting, and regularization.",
+        "id": "a_react",
+        "skill_id": "s_react",
+        "title": "React Component & State Architecture Assessment",
+        "description": "Evaluate your understanding of React component lifecycle, custom hooks, virtual DOM, and unidirectional data flow.",
         "questions": [
             {
-                "id": "q1_sup",
-                "question_text": "What main advantage does Random Forest have over a single Decision Tree?",
+                "id": "q1_react",
+                "question_text": "What is the primary benefit of the Virtual DOM in modern React applications?",
                 "options": [
-                    "It is faster to train on single core CPUs.",
-                    "It reduces variance and overfitting by averaging multiple decorrelated decision trees.",
-                    "It guarantees 100% training accuracy.",
-                    "It requires no feature engineering."
+                    "It directly manipulates browser HTML without JavaScript execution.",
+                    "It computes minimal DOM mutation diffs in memory to minimize expensive browser repaints.",
+                    "It replaces the need for backend REST APIs.",
+                    "It automatically converts CSS styles into server binaries."
                 ],
                 "correct_option_index": 1,
-                "explanation": "Random Forest uses bagging and feature subspace sampling to decrease variance without increasing bias."
+                "explanation": "React maintains a virtual DOM representation, performing reconciliation diffing to batch and apply minimal real DOM operations."
             },
             {
-                "id": "q2_sup",
-                "question_text": "Which regularization technique adds the absolute magnitude of coefficient weights (L1 penalty) to the loss function?",
-                "options": ["Ridge Regression", "Lasso Regression", "ElasticNet", "Batch Normalization"],
+                "id": "q2_react",
+                "question_text": "When creating a custom React Hook, which convention must be strictly followed?",
+                "options": [
+                    "The function name must begin with 'use' and can call other built-in React hooks.",
+                    "It must return a class instance.",
+                    "It must be declared inside a try-catch block.",
+                    "It can only be executed on the server."
+                ],
+                "correct_option_index": 0,
+                "explanation": "React Hook rules require hook names to start with 'use' so the linter can enforce call order and state integrity."
+            }
+        ]
+    },
+    {
+        "id": "a_sql",
+        "skill_id": "s_sql",
+        "title": "SQL Query & Database Indexing Assessment",
+        "description": "Assess relational database querying, multi-table joins, aggregations, and query optimization.",
+        "questions": [
+            {
+                "id": "q1_sql",
+                "question_text": "Which clause is used to filter aggregated groups after a GROUP BY operation?",
+                "options": ["WHERE", "HAVING", "LIMIT", "FILTER"],
                 "correct_option_index": 1,
-                "explanation": "Lasso Regression uses L1 regularization which can drive uninformative feature coefficients to exact zero."
+                "explanation": "HAVING filters aggregated grouped results, whereas WHERE filters individual rows before grouping."
             },
             {
-                "id": "q3_sup",
-                "question_text": "What occurs when a model fits noisy patterns in the training data too closely?",
-                "options": ["Underfitting", "Overfitting (High Variance)", "High Bias", "Data Leakage"],
+                "id": "q2_sql",
+                "question_text": "What type of index is most effective for speeding up exact equality lookups in large relational tables?",
+                "options": ["B-Tree Index", "Full Text Index", "Spatial Index", "Hash Index"],
+                "correct_option_index": 0,
+                "explanation": "B-Tree indexes provide logarithmic time complexity O(log N) for equality and range query lookups."
+            }
+        ]
+    },
+    {
+        "id": "a_stats",
+        "skill_id": "s_stats",
+        "title": "Statistical Inference & Hypothesis Testing Assessment",
+        "description": "Evaluate concepts in probability distributions, p-values, hypothesis tests, and statistical significance.",
+        "questions": [
+            {
+                "id": "q1_stat",
+                "question_text": "In hypothesis testing, what does a p-value less than alpha (e.g., 0.05) indicate?",
+                "options": [
+                    "The null hypothesis should be rejected in favor of the alternative hypothesis.",
+                    "The sample size was too small to make a conclusion.",
+                    "The null hypothesis is proven to be 100% true.",
+                    "A Type II error definitely occurred."
+                ],
+                "correct_option_index": 0,
+                "explanation": "A p-value below alpha provides sufficient evidence against the null hypothesis, rejecting it at the specified significance level."
+            }
+        ]
+    },
+    {
+        "id": "a_aws",
+        "skill_id": "s_aws",
+        "title": "AWS Cloud Infrastructure & Compute Assessment",
+        "description": "Assess core competencies in cloud architecture, virtual private clouds, IAM permissions, and EC2 scaling.",
+        "questions": [
+            {
+                "id": "q1_aws",
+                "question_text": "Which AWS networking component enables private subnet instances to access the internet while blocking inbound connections?",
+                "options": ["Internet Gateway", "NAT Gateway", "Transit Gateway", "Direct Connect"],
                 "correct_option_index": 1,
-                "explanation": "Overfitting happens when a model memorizes training noise, achieving low training error but high test error."
+                "explanation": "A NAT (Network Address Translation) Gateway allows private subnet instances outbound connectivity while preventing external internet traffic from initiating connections."
+            }
+        ]
+    },
+    {
+        "id": "a_cloud_sec",
+        "skill_id": "s_cloud_security",
+        "title": "Cloud Security & Zero-Trust IAM Assessment",
+        "description": "Assess security perimeters, principle of least privilege, and role-based access control.",
+        "questions": [
+            {
+                "id": "q1_sec",
+                "question_text": "What is the core principle of Zero-Trust Security architecture?",
+                "options": [
+                    "Trust any device as long as it connects from an internal corporate network.",
+                    "Never trust, always verify: authenticate and authorize every access request continuously.",
+                    "Rely solely on perimeter firewalls.",
+                    "Disable password expiration policies."
+                ],
+                "correct_option_index": 1,
+                "explanation": "Zero Trust assumes threats exist inside and outside the perimeter, requiring explicit verification and least-privilege access for every request."
             }
         ]
     }

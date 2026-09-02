@@ -27,6 +27,7 @@ interface LearnerContextType {
   refreshState: () => Promise<void>;
   loadPresetProfile: (preset: 'alex' | 'jordan' | 'devon') => Promise<void>;
   exitDemoMode: () => Promise<void>;
+  setTargetCareer: (careerId: string) => Promise<void>;
 }
 
 const LearnerContext = createContext<LearnerContextType | undefined>(undefined);
@@ -175,10 +176,26 @@ export const LearnerProvider: React.FC<{ children: React.ReactNode }> = ({ child
     await refreshState();
   };
 
+  const setTargetCareer = async (careerId: string) => {
+    try {
+      setLoading(true);
+      await api.setTargetCareer(careerId);
+      await refreshState();
+    } catch (e) {
+      console.error('Failed to set target career:', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const exitDemoMode = async () => {
     sessionStorage.setItem('pathfinder_demo_mode', 'false');
     sessionStorage.removeItem('pathfinder_demo_preset');
     setIsDemoMode(false);
+    const savedUser = localStorage.getItem('pathfinder_user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
     await refreshState();
   };
 
@@ -200,6 +217,7 @@ export const LearnerProvider: React.FC<{ children: React.ReactNode }> = ({ child
         refreshState,
         loadPresetProfile,
         exitDemoMode,
+        setTargetCareer,
       }}
     >
       {children}

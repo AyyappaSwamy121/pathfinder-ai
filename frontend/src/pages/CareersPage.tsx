@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import { Career } from '../types';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Sliders, Briefcase, GitCompare } from 'lucide-react';
+import { useLearner } from '../context/LearnerContext';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
@@ -15,8 +16,15 @@ import {
 import { motion } from 'framer-motion';
 
 export const CareersPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { setTargetCareer } = useLearner();
   const [careers, setCareers] = useState<Career[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const handleSelectCareer = async (careerId: string) => {
+    await setTargetCareer(careerId);
+    navigate('/roadmap');
+  };
 
   useEffect(() => {
     api.getCareers().then((res) => {
@@ -91,7 +99,20 @@ export const CareersPage: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="pt-4 border-t border-[var(--border)] flex flex-col sm:flex-row items-center gap-2">
+                <div className="pt-4 border-t border-[var(--border)] flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleSelectCareer(career.id)}
+                      className="flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold bg-[#EEF2FF] text-[#4338CA] border border-[#C7D2FE] hover:bg-[#E0E7FF] transition-colors text-center"
+                    >
+                      Set as Target Career
+                    </button>
+                    <Link to={`/roadmap`} onClick={() => setTargetCareer(career.id)} className="shrink-0">
+                      <Button size="sm" variant="secondary" title="View Roadmap">
+                        Roadmap
+                      </Button>
+                    </Link>
+                  </div>
                   <Link to={`/career-twin?target=${career.id}`} className="w-full">
                     <Button size="sm" variant="primary" className="w-full justify-between">
                       <span className="flex items-center gap-1.5">

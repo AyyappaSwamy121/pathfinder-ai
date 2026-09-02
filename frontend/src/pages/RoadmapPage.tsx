@@ -4,10 +4,11 @@ import { PathStep } from '../types';
 import { WhyThisModal } from '../components/WhyThisModal';
 import { AssessmentModal } from '../components/AssessmentModal';
 import { Link } from 'react-router-dom';
-import { CheckCircle2, Clock, Award, ExternalLink, HelpCircle, ChevronDown, RefreshCw, GitCompare } from 'lucide-react';
+import { CheckCircle2, Clock, Award, ExternalLink, HelpCircle, ChevronDown, RefreshCw, GitCompare, Briefcase } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
+import { SEED_CAREERS } from '../services/api';
 import {
   StaggerContainer,
   StaggerItem,
@@ -18,7 +19,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const RoadmapPage: React.FC = () => {
-  const { activePath, loading, refreshState } = useLearner();
+  const { activePath, loading, refreshState, setTargetCareer } = useLearner();
 
   const [selectedStep, setSelectedStep] = useState<PathStep | null>(null);
   const [whyThisOpen, setWhyThisOpen] = useState(false);
@@ -72,8 +73,25 @@ export const RoadmapPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Link to="/career-twin">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Target Role Switcher */}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#CBD5E1] bg-[#F8FAFC]">
+              <span className="text-xs font-semibold text-[#64748B]">Target Role:</span>
+              <select
+                value={activePath.career_id}
+                onChange={(e) => setTargetCareer(e.target.value)}
+                className="text-xs font-bold text-[#4338CA] bg-transparent focus:outline-none cursor-pointer"
+                aria-label="Switch Target Career Roadmap"
+              >
+                {SEED_CAREERS.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <Link to={`/career-twin?target=${activePath.career_id}`}>
               <Button size="sm" variant="primary">
                 <GitCompare className="w-3.5 h-3.5 mr-1" />
                 <span>Optimize in Career Twin</span>

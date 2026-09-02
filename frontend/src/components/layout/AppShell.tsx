@@ -201,7 +201,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         <TopHeader onOpenMobileSidebar={() => setMobileOpen(true)} />
 
         {/* Main Content View */}
-        <main className="flex-1 max-w-6xl w-full mx-auto px-8 py-8">
+        <main className="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
           <PageTransition key={location.pathname}>
             {children}
           </PageTransition>

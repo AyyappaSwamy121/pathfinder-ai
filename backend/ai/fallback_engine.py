@@ -136,8 +136,16 @@ class OfflineFallbackEngine:
                 "suggested_actions": ["Take Assessment", "View Prerequisites"]
             }
         elif "project" in q_lower or "build" in q_lower:
+            role_projects = {
+                "Data Scientist": "the **Customer Churn Analysis** (EDA & ML) followed by the **Sales Forecasting Pipeline** (Feature Engineering).",
+                "Full Stack Developer": "the **Interactive SaaS Collaboration Platform** (React & TypeScript) followed by the **Scalable RESTful Backend Microservices** (Node.js & PostgreSQL).",
+                "Data Analyst": "the **E-Commerce Relational Analytics Pipeline** (SQL) followed by the **Executive Business Intelligence KPI Dashboard** (Tableau/PowerBI).",
+                "Cloud Engineer": "the **Resilient Multi-Tier AWS Infrastructure** (VPC & EC2) followed by the **Containerized Microservice Kubernetes Deployment** (Docker & K8s).",
+                "Cybersecurity Engineer": "the **Zero-Trust Cloud IAM & Network Security Audit** followed by the **Vulnerability Assessment Lab**."
+            }
+            rec = role_projects.get(target_career, "the **Customer Churn Prediction Engine** (XGBoost) followed by the **Production ML Inference Microservice** with Docker & FastAPI.")
             return {
-                "reply": f"To build portfolio evidence for **{target_career}**, we recommend the **Customer Churn Prediction Engine** (XGBoost) followed by the **Production ML Inference Microservice** with Docker & FastAPI.",
+                "reply": f"To build portfolio evidence for **{target_career}**, we recommend {rec}",
                 "suggested_actions": ["View Recommended Projects", "Start Next Milestone"]
             }
         else:

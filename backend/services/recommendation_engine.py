@@ -5,6 +5,8 @@ from backend.models.domain import (
 )
 from backend.services.skill_gap_engine import SkillGapEngine
 
+from backend.services.career_knowledge import CAREER_KNOWLEDGE
+
 class HybridRecommendationEngine:
 
     @staticmethod
@@ -13,6 +15,9 @@ class HybridRecommendationEngine:
         Determines the single highest priority 'Next Best Action' for the learner.
         Considers skill gap, unlocked prerequisites, time availability, and step order.
         """
+        profile = db.query(LearnerProfile).filter(LearnerProfile.id == profile_id).first()
+        target_career_id = (profile.target_career_id if profile else "c_ai_engineer") or "c_ai_engineer"
+
         path = db.query(LearningPath).filter(
             LearningPath.profile_id == profile_id,
             LearningPath.is_active == True
@@ -27,18 +32,21 @@ class HybridRecommendationEngine:
             ).order_by(PathStep.step_order).first()
 
         if not next_step:
-            # Fallback to Model Evaluation
-            skill = db.query(Skill).filter(Skill.id == "s_model_eval").first()
-            resource = db.query(Resource).filter(Resource.skill_id == "s_model_eval").first()
+            career_cfg = CAREER_KNOWLEDGE.get(target_career_id, CAREER_KNOWLEDGE["c_ai_engineer"])
+            default_act = career_cfg.get("default_next_action")
+            if default_act:
+                return default_act
+
+            # Generic fallback
             return {
-                "skill_id": "s_model_eval",
-                "skill_name": "Model Evaluation & Metrics",
-                "title": resource.title if resource else "Master Model Evaluation Metrics",
+                "skill_id": "s_python",
+                "skill_name": "Core Programming",
+                "title": "Master Core Foundations",
                 "action_type": "Resource",
                 "estimated_minutes": 45,
-                "why_now": "Addresses a critical skill gap for AI Engineer and unlocks downstream Deep Learning modules.",
+                "why_now": "Addresses foundational competency required for your target career path.",
                 "cta_label": "Start Learning",
-                "item_id": resource.id if resource else "r_eval_1"
+                "item_id": "r_python_1"
             }
 
         skill = db.query(Skill).filter(Skill.id == next_step.skill_id).first()
