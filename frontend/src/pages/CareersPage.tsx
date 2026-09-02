@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import { Career } from '../types';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sliders, Briefcase } from 'lucide-react';
+import { ArrowRight, Sliders, Briefcase, GitCompare } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
@@ -91,10 +91,13 @@ export const CareersPage: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="pt-4 border-t border-[var(--border)] flex items-center justify-between">
-                  <Link to="/simulator" className="w-full">
-                    <Button size="sm" variant="ghost" className="w-full justify-between hover:bg-[var(--brand-soft)] hover:text-[var(--brand)]">
-                      <span>Simulate Transition</span>
+                <div className="pt-4 border-t border-[var(--border)] flex flex-col sm:flex-row items-center gap-2">
+                  <Link to={`/career-twin?target=${career.id}`} className="w-full">
+                    <Button size="sm" variant="primary" className="w-full justify-between">
+                      <span className="flex items-center gap-1.5">
+                        <GitCompare className="w-3.5 h-3.5" />
+                        <span>Simulate in Career Twin</span>
+                      </span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </Button>
                   </Link>

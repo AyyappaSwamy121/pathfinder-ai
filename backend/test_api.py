@@ -116,7 +116,36 @@ def run_all_backend_tests():
     assert "reply" in chat_res
     print("[PASS] Grounded AI Copilot Passed | Reply snippet:", chat_res["reply"][:60], "...")
 
+    # 12. Career Twin Intelligent Transition Simulator
+    res = client.post("/api/career-twin/simulate", json={
+        "target_career_id": "c_data_scientist",
+        "weekly_hours": 8,
+        "target_timeline_months": 6,
+        "priority_mode": "BALANCED"
+    })
+    assert res.status_code == 200, f"Career Twin simulate failed: {res.text}"
+    ct_data = res.json()
+    assert len(ct_data["paths"]) == 3, "Expected 3 multi-path strategies"
+    assert "highest_leverage_action" in ct_data
+    assert "learning_roi_recommendations" in ct_data
+    assert ct_data["highest_leverage_action"]["roi_score"] > 0
+    print("[PASS] Career Twin Simulator Passed | Overlap:", ct_data["skill_overlap_percentage"], "% | 3 Paths:", [p["name"] for p in ct_data["paths"]])
+
+    # 13. Career Twin Grounded AI Explanation
+    res = client.post("/api/career-twin/explain", json={
+        "target_career_id": "c_data_scientist",
+        "question": "Why should I choose this path?",
+        "selected_path_id": "balanced",
+        "weekly_hours": 8
+    })
+    assert res.status_code == 200, f"Career Twin explain failed: {res.text}"
+    exp_data = res.json()
+    assert "explanation" in exp_data
+    assert len(exp_data["key_takeaways"]) > 0
+    print("[PASS] Career Twin Grounded AI Explanation Passed | Snippet:", exp_data["explanation"][:60], "...")
+
     print("=== ALL BACKEND TESTS PASSED SUCCESSFULLY! ===")
 
 if __name__ == "__main__":
     run_all_backend_tests()
+

@@ -15,6 +15,7 @@ from backend.api.skill_router import router as skill_router
 from backend.api.assessment_router import router as assessment_router
 from backend.api.chat_router import router as chat_router
 from backend.api.dashboard_router import router as dashboard_router
+from backend.api.career_twin_router import router as career_twin_router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -62,11 +63,13 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(profile_router)
 app.include_router(career_router)
+app.include_router(career_twin_router)
 app.include_router(roadmap_router)
 app.include_router(skill_router)
 app.include_router(assessment_router)
 app.include_router(chat_router)
 app.include_router(dashboard_router)
+
 
 from fastapi.exceptions import HTTPException
 

@@ -3,7 +3,8 @@ import { useLearner } from '../context/LearnerContext';
 import { PathStep } from '../types';
 import { WhyThisModal } from '../components/WhyThisModal';
 import { AssessmentModal } from '../components/AssessmentModal';
-import { CheckCircle2, Clock, Award, ExternalLink, HelpCircle, ChevronDown, RefreshCw } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { CheckCircle2, Clock, Award, ExternalLink, HelpCircle, ChevronDown, RefreshCw, GitCompare } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
@@ -71,10 +72,18 @@ export const RoadmapPage: React.FC = () => {
             </p>
           </div>
 
-          <Button size="sm" variant="secondary" onClick={() => refreshState()}>
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>Recalculate Roadmap</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link to="/career-twin">
+              <Button size="sm" variant="primary">
+                <GitCompare className="w-3.5 h-3.5 mr-1" />
+                <span>Optimize in Career Twin</span>
+              </Button>
+            </Link>
+            <Button size="sm" variant="secondary" onClick={() => refreshState()}>
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Recalculate</span>
+            </Button>
+          </div>
         </Card>
       </motion.div>
 

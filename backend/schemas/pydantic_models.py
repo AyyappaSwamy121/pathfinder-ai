@@ -237,3 +237,82 @@ class DashboardResponse(BaseModel):
     milestones_total: int
     skill_gaps: SkillGapAnalysisResponse
     ai_insight: str
+
+# Career Twin Schemas
+class CareerTwinSimulateRequest(BaseModel):
+    target_career_id: str
+    weekly_hours: Optional[int] = 8
+    target_timeline_months: Optional[int] = 6
+    priority_mode: Optional[str] = "BALANCED" # FASTEST, BALANCED, PORTFOLIO
+
+class TransitionMilestone(BaseModel):
+    phase: int
+    title: str
+    skills: List[str]
+    estimated_weeks: int
+    project: Optional[str] = None
+
+class TransitionPathOption(BaseModel):
+    id: str
+    name: str
+    description: str
+    estimated_weeks: int
+    weekly_hours: int
+    current_readiness: float
+    target_readiness: float
+    skills_count: int
+    projects_count: int
+    trade_offs: str
+    milestones: List[TransitionMilestone] = []
+
+class LearningRoiItem(BaseModel):
+    skill_id: str
+    skill_name: str
+    roi_score: float
+    readiness_impact: float
+    prerequisite_leverage: int
+    relevance_score: float
+    estimated_hours: int
+    why_it_matters: str
+    what_it_unlocks: List[str] = []
+
+class TransitionNode(BaseModel):
+    skill_id: str
+    name: str
+    status: str # MASTERED, DEVELOPING, MISSING, BLOCKED, NEWLY_UNLOCKED
+    category: str
+    prerequisites: List[str] = []
+    unlocks: List[str] = []
+    estimated_hours: int = 12
+
+class CareerTwinSimulateResponse(BaseModel):
+    current_career_id: str
+    current_career_title: str
+    target_career_id: str
+    target_career_title: str
+    current_readiness: float
+    target_readiness: float
+    skill_overlap_percentage: float
+    transferable_skills: List[str]
+    missing_skills: List[str]
+    blocked_skills: List[str]
+    total_estimated_effort_hours: int
+    weekly_hours: int
+    paths: List[TransitionPathOption]
+    selected_path_id: str
+    highest_leverage_action: Optional[LearningRoiItem] = None
+    learning_roi_recommendations: List[LearningRoiItem] = []
+    transition_graph_nodes: List[TransitionNode] = []
+    ai_explanation: str
+
+class CareerTwinExplainRequest(BaseModel):
+    target_career_id: str
+    question: str
+    selected_path_id: Optional[str] = "balanced"
+    weekly_hours: Optional[int] = 8
+
+class CareerTwinExplainResponse(BaseModel):
+    explanation: str
+    key_takeaways: List[str] = []
+    suggested_questions: List[str] = []
+

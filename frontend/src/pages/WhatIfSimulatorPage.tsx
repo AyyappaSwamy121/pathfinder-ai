@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { useLearner } from '../context/LearnerContext';
 import { Career, SimulateCareerResponse } from '../types';
-import { ArrowRight, CheckCircle2, Clock } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, CheckCircle2, Clock, GitCompare, Sparkles } from 'lucide-react';
 import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import {
   AnimatedNumber,
@@ -60,19 +62,28 @@ export const WhatIfSimulatorPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-[var(--text-secondary)]">Compare with:</span>
-            <select
-              value={selectedCareerId}
-              onChange={(e) => setSelectedCareerId(e.target.value)}
-              className="p-2 rounded-[var(--radius-sm)] border border-[var(--border-strong)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none bg-[var(--surface)] hover:border-slate-400 transition-colors cursor-pointer"
-            >
-              {careers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.title}
-                </option>
-              ))}
-            </select>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Compare with:</span>
+              <select
+                value={selectedCareerId}
+                onChange={(e) => setSelectedCareerId(e.target.value)}
+                className="p-2 rounded-[var(--radius-sm)] border border-[var(--border-strong)] text-xs font-semibold text-[var(--text-primary)] focus:outline-none bg-[var(--surface)] hover:border-slate-400 transition-colors cursor-pointer"
+              >
+                {careers.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <Link to={`/career-twin?target=${selectedCareerId}`}>
+              <Button size="sm" variant="primary">
+                <GitCompare className="w-3.5 h-3.5 mr-1" />
+                <span>Launch in Career Twin</span>
+              </Button>
+            </Link>
           </div>
         </Card>
       </motion.div>

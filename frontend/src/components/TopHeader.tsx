@@ -31,6 +31,8 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenMobileSidebar }) => 
         return 'Adaptive Assessments';
       case '/simulator':
         return 'What-if Career Simulator';
+      case '/career-twin':
+        return 'Career Twin — Intelligent Transition Simulator';
       case '/copilot':
         return 'Grounded AI Copilot';
       case '/architecture':

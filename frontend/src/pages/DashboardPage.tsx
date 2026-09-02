@@ -8,7 +8,7 @@ import { WhyThisModal } from '../components/WhyThisModal';
 import { AssessmentModal } from '../components/AssessmentModal';
 import { FeedbackModal } from '../components/FeedbackModal';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronRight, GitCompare, Sparkles } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
@@ -94,12 +94,20 @@ export const DashboardPage: React.FC = () => {
             </div>
           </div>
 
-          <Link to="/roadmap">
-            <Button size="sm" variant="primary">
-              <span>Continue Your Path</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link to="/career-twin">
+              <Button size="sm" variant="secondary" className="border-indigo-200 text-[#4F46E5] hover:bg-indigo-50/50">
+                <GitCompare className="w-3.5 h-3.5 mr-1" />
+                <span>Simulate in Career Twin</span>
+              </Button>
+            </Link>
+            <Link to="/roadmap">
+              <Button size="sm" variant="primary">
+                <span>Continue Your Path</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Button>
+            </Link>
+          </div>
         </Card>
       </motion.div>
 

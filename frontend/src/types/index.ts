@@ -193,4 +193,77 @@ export interface DashboardData {
   ai_insight: string;
 }
 
+// Career Twin Types
+export interface TransitionMilestone {
+  phase: number;
+  title: string;
+  skills: string[];
+  estimated_weeks: number;
+  project?: string | null;
+}
+
+export interface TransitionPathOption {
+  id: 'fastest' | 'balanced' | 'portfolio' | string;
+  name: string;
+  description: string;
+  estimated_weeks: number;
+  weekly_hours: number;
+  current_readiness: number;
+  target_readiness: number;
+  skills_count: number;
+  projects_count: number;
+  trade_offs: string;
+  milestones: TransitionMilestone[];
+}
+
+export interface LearningRoiItem {
+  skill_id: string;
+  skill_name: string;
+  roi_score: number;
+  readiness_impact: number;
+  prerequisite_leverage: number;
+  relevance_score: number;
+  estimated_hours: number;
+  why_it_matters: string;
+  what_it_unlocks: string[];
+}
+
+export interface TransitionNode {
+  skill_id: string;
+  name: string;
+  status: 'MASTERED' | 'DEVELOPING' | 'MISSING' | 'BLOCKED' | 'NEWLY_UNLOCKED';
+  category: string;
+  prerequisites: string[];
+  unlocks: string[];
+  estimated_hours: number;
+}
+
+export interface CareerTwinSimulateResponse {
+  current_career_id: string;
+  current_career_title: string;
+  target_career_id: string;
+  target_career_title: string;
+  current_readiness: number;
+  target_readiness: number;
+  skill_overlap_percentage: number;
+  transferable_skills: string[];
+  missing_skills: string[];
+  blocked_skills: string[];
+  total_estimated_effort_hours: number;
+  weekly_hours: number;
+  paths: TransitionPathOption[];
+  selected_path_id: string;
+  highest_leverage_action: LearningRoiItem | null;
+  learning_roi_recommendations: LearningRoiItem[];
+  transition_graph_nodes: TransitionNode[];
+  ai_explanation: string;
+}
+
+export interface CareerTwinExplainResponse {
+  explanation: string;
+  key_takeaways: string[];
+  suggested_questions: string[];
+}
+
+
 

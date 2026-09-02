@@ -19,6 +19,7 @@ import { CareersPage } from './pages/CareersPage';
 import { AssessmentPage } from './pages/AssessmentPage';
 import { CopilotPage } from './pages/CopilotPage';
 import { WhatIfSimulatorPage } from './pages/WhatIfSimulatorPage';
+import { CareerTwinPage } from './pages/CareerTwinPage';
 import { ArchitecturePage } from './pages/ArchitecturePage';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -171,6 +172,16 @@ export const App: React.FC = () => {
                   <ProtectedRoute>
                     <AppShell>
                       <WhatIfSimulatorPage />
+                    </AppShell>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/career-twin"
+                element={
+                  <ProtectedRoute>
+                    <AppShell>
+                      <CareerTwinPage />
                     </AppShell>
                   </ProtectedRoute>
                 }

@@ -1,9 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { ReactFlow, Background, Controls, Node, Edge, MarkerType } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { Link } from 'react-router-dom';
 import { useLearner } from '../context/LearnerContext';
-import { GitGraph, ShieldCheck } from 'lucide-react';
+import { GitGraph, ShieldCheck, GitCompare } from 'lucide-react';
 import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { CardSkeleton, TRANSITION_EASE } from '../components/motion/MotionPrimitives';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -103,10 +105,18 @@ export const SkillGraphPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-3 text-xs font-medium">
-            <Badge tone="success">Mastered</Badge>
-            <Badge tone="brand">Developing</Badge>
-            <Badge tone="neutral">Locked</Badge>
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-2 text-xs font-medium">
+              <Badge tone="success">Mastered</Badge>
+              <Badge tone="brand">Developing</Badge>
+              <Badge tone="neutral">Locked</Badge>
+            </div>
+            <Link to="/career-twin">
+              <Button size="sm" variant="secondary" className="border-indigo-200 text-[#4F46E5] hover:bg-indigo-50/50">
+                <GitCompare className="w-3.5 h-3.5 mr-1" />
+                <span>Simulate in Career Twin</span>
+              </Button>
+            </Link>
           </div>
         </Card>
       </motion.div>
